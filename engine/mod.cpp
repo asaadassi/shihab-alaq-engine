@@ -527,7 +527,7 @@ bool IsModBanned(wil::zwstring_view modName, std::wstring_view modVersion) {
 }
 
 wil::unique_hmodule SetModShimsLibraryIfNeeded(HMODULE mod) {
-    constexpr WCHAR kShimLibraryFileName[] = L"windhawk-mod-shim.dll";
+    constexpr WCHAR kShimLibraryFileName[] = L"shihab-styler-mod-shim.dll";
     wil::unique_hmodule shimModule;
 
     auto patchFunction = [](void* patchTarget, void* newCallTarget) {
@@ -1482,7 +1482,7 @@ LoadedMod::LoadedMod(PCWSTR modName,
 #else
 #error "Unsupported architecture"
 #endif
-    VERBOSE(L"Windhawk v" VER_FILE_VERSION_WSTR L" " WINDHAWK_ARCH);
+    VERBOSE(L"Shihab Styler engine v" VER_FILE_VERSION_WSTR L" " WINDHAWK_ARCH);
 #undef WINDHAWK_ARCH
     VERBOSE(L"Mod id: %s", m_modName.c_str());
     VERBOSE(L"Mod version: %s", m_modVersion.c_str());
@@ -2838,7 +2838,7 @@ const WH_URL_CONTENT* LoadedMod::GetUrlContent(
         urlComp.dwExtraInfoLength = (DWORD)-1;
         THROW_IF_WIN32_BOOL_FALSE(winhttp.CrackUrl(url, 0, 0, &urlComp));
 
-        HINTERNET session{winhttp.Open(L"Windhawk/" VER_FILE_VERSION_WSTR,
+        HINTERNET session{winhttp.Open(L"ShihabStyler/" VER_FILE_VERSION_WSTR,
                                        WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
                                        WINHTTP_NO_PROXY_NAME,
                                        WINHTTP_NO_PROXY_BYPASS, 0)};
@@ -3079,11 +3079,11 @@ std::optional<std::wstring> LoadedMod::HookSymbolsGetOnlineCache(
         L"In case of a firewall, you can open cmd as administrator and run the "
         L"following command, then disable and re-enable the mod:");
     VERBOSE(
-        LR"(for /f "delims=" %%I in ('curl -f %s') do @reg add "HKLM\SOFTWARE\Windhawk\Engine\ModsWritable\%s\SymbolCache" /t REG_SZ /v %.*s /d "%%I" /f)",
+        LR"(for /f "delims=" %%I in ('curl -f %s') do @reg add "HKLM\SOFTWARE\ShihabStyler\Engine\ModsWritable\%s\SymbolCache" /t REG_SZ /v %.*s /d "%%I" /f)",
         onlineCacheUrl.c_str(), m_modName.c_str(),
         wil::safe_cast<int>(cacheStrKey.length()), cacheStrKey.data());
     VERBOSE(
-        L"Note: If using the portable version of Windhawk, the equivalent .ini "
+        L"Note: If using a portable copy of the engine, the equivalent .ini "
         L"file needs to be edited instead");
 
     return std::nullopt;

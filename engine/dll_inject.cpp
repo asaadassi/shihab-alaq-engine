@@ -706,7 +706,7 @@ void DllInject(HANDLE hProcess,
 
     std::wstring dllPath =
         StorageManager::GetInstance().GetEnginePath(targetProcessArch) /
-        L"windhawk.dll";
+        L"shihab-styler-engine.dll";
     size_t dllPathBytes = (dllPath.length() + 1) * sizeof(WCHAR);
 
     HANDLE hRemoteSessionManagerProcess;
@@ -820,7 +820,7 @@ void DllInject(HANDLE hProcess,
                     pRemoteThreadAddress),
                 pRemoteData, createThreadFlags, 0, 0, 0, nullptr);
             Functions::SetThreadDescriptionIfAvailable(
-                remoteThread.get(), L"WindhawkInjectedFromWow64");
+                remoteThread.get(), L"ShihabStylerInjectedFromWow64");
         } else
 #endif  // _WIN64
         {
@@ -830,7 +830,7 @@ void DllInject(HANDLE hProcess,
                                                 createThreadFlags));
             THROW_LAST_ERROR_IF_NULL(remoteThread);
             Functions::SetThreadDescriptionIfAvailable(remoteThread.get(),
-                                                       L"WindhawkInjected");
+                                                       L"ShihabStylerInjected");
         }
     }
 

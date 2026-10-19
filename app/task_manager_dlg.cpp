@@ -114,9 +114,9 @@ void CTaskManagerDlg::LoadLanguageStrings() {
             break;
     }
 
-    WCHAR title[1024] = L"Windhawk";
+    WCHAR title[1024] = L"Shihab Styler";
     if (titleId) {
-        _snwprintf_s(title, _TRUNCATE, L"%s - Windhawk",
+        _snwprintf_s(title, _TRUNCATE, L"%s - Shihab Styler",
                      Functions::LoadStrFromRsrc(titleId));
     }
     SetWindowText(title);

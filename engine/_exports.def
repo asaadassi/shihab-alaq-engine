@@ -1,4 +1,4 @@
-LIBRARY "windhawk.dll"
+LIBRARY "shihab-styler-engine.dll"
 EXPORTS
 	InjectInit
 	GlobalHookSessionStart

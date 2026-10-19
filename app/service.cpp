@@ -77,7 +77,7 @@ HANDLE CreateServiceMutex() {
     return mutex.release();
 }
 
-// Launches the Windhawk daemon on every logged-on session, each on that
+// Launches the engine daemon on every logged-on session, each on that
 // session's own user token. A daemon opens the UI unless started with
 // -tray-only, so the session named by runUiSessionId gets one without it, which
 // is how an elevated caller has the UI opened unelevated.

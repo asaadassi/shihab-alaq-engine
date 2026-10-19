@@ -290,7 +290,7 @@ int CMainWindow::OnCreate(LPCREATESTRUCT lpCreateStruct) {
             InitForNonPortableVersion();
         }
     } catch (const std::exception& e) {
-        ::MessageBoxA(nullptr, e.what(), "Could not initialize Windhawk",
+        ::MessageBoxA(nullptr, e.what(), "Could not initialize the Shihab Styler engine",
                       MB_ICONERROR);
         return -1;
     }
@@ -311,7 +311,7 @@ int CMainWindow::OnCreate(LPCREATESTRUCT lpCreateStruct) {
     }
 
     if (!LoadSettings()) {
-        ::MessageBox(nullptr, L"Could not load settings", L"Windhawk error",
+        ::MessageBox(nullptr, L"Could not load settings", L"Shihab Styler error",
                      MB_ICONERROR);
     }
 
@@ -746,7 +746,7 @@ bool CMainWindow::LoadSettings() {
         auto settings =
             StorageManager::GetInstance().GetAppConfig(L"Settings", false);
 
-        auto language = settings->GetString(L"Language").value_or(L"en");
+        auto language = settings->GetString(L"Language").value_or(L"ar");
         LCID lcid = LocaleNameToLCID(language.c_str(), 0);
         if (lcid == LOCALE_CUSTOM_UNSPECIFIED) {
             // Languages without a Microsoft-assigned LCID need a synthetic
@@ -762,8 +762,9 @@ bool CMainWindow::LoadSettings() {
         }
 
         hideTrayIcon = settings->GetInt(L"HideTrayIcon").value_or(0);
-        disableUpdateCheck =
-            settings->GetInt(L"DisableUpdateCheck").value_or(0);
+        // Shihab Styler updates the engine with its own installer, so the
+        // engine never checks for updates itself.
+        disableUpdateCheck = true;
 
         if (m_portable) {
             lastUpdateCheck = std::wcstoull(
@@ -1053,7 +1054,7 @@ void CMainWindow::StopService(HWND hWnd) {
                                 std::string msg =
                                     "Exiting failed with the error below. If "
                                     "nothing else works, you can choose to "
-                                    "send an exit signal to the Windhawk "
+                                    "send an exit signal to the Shihab Styler "
                                     "service. Send exit signal?\n\nError:\n";
 
                                 msg += e.what();
@@ -1159,12 +1160,12 @@ void CMainWindow::ResetLastUpdateTime() {
 
 void CMainWindow::OpenUpdatePage() {
     PCWSTR url =
-        L"https://windhawk.net/download?version=" VER_FILE_VERSION_WSTR;
+        L"https://github.com/asaadassi/shihab-styler-releases/releases";
 
     if ((int)(UINT_PTR)ShellExecute(m_hWnd, nullptr, url, nullptr, nullptr,
                                     SW_SHOWNORMAL) <= 32) {
         MessageBox(
-            L"Could not open the update page, please update Windhawk manually",
+            L"Could not open the update page, please update Shihab Styler manually",
             L"Error", MB_ICONERROR);
     }
 }

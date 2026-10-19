@@ -10,7 +10,9 @@
 // (VER_FILE_VERSION_STR/_WSTR) and the .rc "FileVersion"/"ProductVersion"
 // string values; the numeric fields above, VER_FILE_VERSION (the .rc
 // FILEVERSION tuple) and VER_FILE_VERSION_LONG stay strictly numeric.
-#define VERSION_PRERELEASE          "-alpha.7"
+// Shihab Styler keeps the upstream Windhawk version numbers (mods compile against them as
+// WH_WINDHAWK_VERSION) and marks its own builds with "-shihab.N".
+#define VERSION_PRERELEASE          "-shihab.1"
 
 // etc.
 #define STRINGIZE2(s)               #s

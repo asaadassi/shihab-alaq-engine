@@ -42,9 +42,9 @@ namespace SessionPrivateNamespace {
 int MakeName(WCHAR szPrivateNamespaceName[kPrivateNamespaceMaxLen + 1],
              DWORD dwSessionManagerProcessId) {
     static_assert(kPrivateNamespaceMaxLen + 1 ==
-                  sizeof("WindhawkSession1234567890"));
+                  sizeof("ShihabStylerSession1234567890"));
     int len = swprintf_s(szPrivateNamespaceName, kPrivateNamespaceMaxLen + 1,
-                         L"WindhawkSession%u", dwSessionManagerProcessId);
+                         L"ShihabStylerSession%u", dwSessionManagerProcessId);
     THROW_HR_IF(E_UNEXPECTED, len < 0);
     return len;
 }
@@ -59,8 +59,8 @@ wil::unique_private_namespace_destroy Create(DWORD dwSessionManagerProcessId) {
     //
     // * Boundary: If not unique, it will prevent other session managers from
     //   creating their own private namespaces, and will generally prevent
-    //   isolation for multiple Windhawk versions running simultaneously.
-    // * Namespace: If not unique, different Windhawk engine versions loaded in
+    //   isolation for multiple engine versions running simultaneously.
+    // * Namespace: If not unique, different engine versions loaded in
     //   the same process won't be able to operate simultaneously.
     wil::unique_boundary_descriptor boundaryDesc(
         BuildBoundaryDescriptor(szPrivateNamespaceName));

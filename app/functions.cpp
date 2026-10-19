@@ -76,7 +76,7 @@ BOOL IsRunAsAdmin() {
 bool WriteFileContentAtomically(const std::filesystem::path& path,
                                 std::string_view content) {
     // Unique temp name per writer, so no two concurrent writers ever touch the
-    // same temp file - not two threads here, not another Windhawk process, and
+    // same temp file - not two threads here, not another engine process, and
     // not the core, all of which derive the temp name the same way. The process
     // and thread ids suffice: a thread runs only one write at a time, so the
     // pair is unique across every writer live at once. The single shared step

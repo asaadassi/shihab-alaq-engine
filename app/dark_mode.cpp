@@ -24,7 +24,7 @@ constexpr PCWSTR kTaskDialogDarkThemeName = L"DarkMode_Explorer";
 bool IsDisabledByEnvVar() {
     static bool disabled = [] {
         WCHAR value[16];
-        DWORD size = GetEnvironmentVariable(L"WINDHAWK_DISABLE_DARK_MODE",
+        DWORD size = GetEnvironmentVariable(L"SHIHAB_STYLER_DISABLE_DARK_MODE",
                                             value, ARRAYSIZE(value));
         return size > 0 && size < ARRAYSIZE(value) && wcscmp(value, L"1") == 0;
     }();
@@ -79,7 +79,7 @@ FARPROC GetUxThemeProcByOrdinal(WORD ordinal) {
 // theme makes them dark. It takes the text colors from the "TaskDialogStyle"
 // class, which has no dark variant, so the text is painted again here in dark
 // colors over the panels, at the positions the page reports through UI
-// Automation. Only the elements Windhawk's dialogs use are covered.
+// Automation. Only the elements the engine's dialogs use are covered.
 
 constexpr UINT_PTR kTaskDialogSubclassId = 1;
 

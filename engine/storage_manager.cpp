@@ -259,7 +259,7 @@ std::filesystem::path StorageManager::GetEngineBinariesPath() {
     std::filesystem::path libraryPath =
         wil::GetModuleFileName<std::wstring>(g_hDllInst);
 
-    // libraryPath is <engine binaries>/<version>/<architecture>/windhawk.dll,
+    // libraryPath is <engine binaries>/<version>/<architecture>/shihab-styler-engine.dll,
     // so strip the file name, architecture, and version segments.
     return libraryPath.parent_path().parent_path().parent_path();
 }

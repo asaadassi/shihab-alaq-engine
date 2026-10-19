@@ -2,7 +2,7 @@
 
 // Dark mode for the app's dialogs, following the system apps theme. Requires
 // the DarkMode_DarkTheme visual style classes, which ship with Windows 11 24H2
-// build 26100.6899 and later. Setting the WINDHAWK_DISABLE_DARK_MODE=1
+// build 26100.6899 and later. Setting the SHIHAB_STYLER_DISABLE_DARK_MODE=1
 // environment variable disables all of it, including the dark popup menus.
 namespace DarkMode {
 

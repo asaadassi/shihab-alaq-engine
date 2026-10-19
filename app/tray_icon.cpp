@@ -17,7 +17,7 @@ AppTrayIcon::AppTrayIcon(HWND hWnd,
     m_nid.uCallbackMessage = uCallbackMsg;
     m_nid.hIcon = m_trayIcon;
     m_nid.uVersion = NOTIFYICON_VERSION_4;
-    wcscpy_s(m_nid.szTip, L"Windhawk");
+    wcscpy_s(m_nid.szTip, L"Shihab Styler");
     m_nid.dwState = hidden ? NIS_HIDDEN : 0;
     m_nid.dwStateMask = NIS_HIDDEN;
     m_nid.hBalloonIcon = m_balloonIcon;
@@ -57,7 +57,7 @@ void AppTrayIcon::SetNotificationIconAndTooltip(NotificationIcon icon,
     if (pText) {
         wcsncpy_s(m_nid.szTip, pText, _TRUNCATE);
     } else {
-        wcscpy_s(m_nid.szTip, L"Windhawk");
+        wcscpy_s(m_nid.szTip, L"Shihab Styler");
     }
 
     Shell_NotifyIcon(NIM_MODIFY, &m_nid);
@@ -66,7 +66,7 @@ void AppTrayIcon::SetNotificationIconAndTooltip(NotificationIcon icon,
 void AppTrayIcon::ShowNotificationMessage(PCWSTR pText) {
     m_nid.uFlags |= NIF_INFO;
     wcsncpy_s(m_nid.szInfo, pText, _TRUNCATE);
-    wcscpy_s(m_nid.szInfoTitle, L"Windhawk");
+    wcscpy_s(m_nid.szInfoTitle, L"Shihab Styler");
     m_nid.dwInfoFlags = NIIF_USER | NIIF_LARGE_ICON;
 
     Shell_NotifyIcon(NIM_MODIFY, &m_nid);

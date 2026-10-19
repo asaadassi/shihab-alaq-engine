@@ -2,21 +2,21 @@
 
 namespace ServiceCommon {
 
-static inline constexpr WCHAR kName[] = L"Windhawk";
+static inline constexpr WCHAR kName[] = L"ShihabStyler";
 
 static inline constexpr WCHAR kInfoFileMappingName[] =
-    L"Global\\WindhawkServiceInfoFileMapping";
+    L"Global\\ShihabStylerServiceInfoFileMapping";
 
-static inline constexpr WCHAR kMutexName[] = L"Global\\WindhawkServiceMutex";
+static inline constexpr WCHAR kMutexName[] = L"Global\\ShihabStylerServiceMutex";
 
 static inline constexpr WCHAR kScanForProcessesEventName[] =
-    L"Global\\WindhawkScanForProcesses";
+    L"Global\\ShihabStylerScanForProcesses";
 
 static inline constexpr WCHAR kEmergencyStopEventName[] =
-    L"Global\\WindhawkServiceEmergencyStopEvent";
+    L"Global\\ShihabStylerServiceEmergencyStopEvent";
 
 static inline constexpr WCHAR kSafeModeStopEventName[] =
-    L"Global\\WindhawkServiceSafeModeStopEvent";
+    L"Global\\ShihabStylerServiceSafeModeStopEvent";
 
 struct ServiceInfo {
     DWORD version;

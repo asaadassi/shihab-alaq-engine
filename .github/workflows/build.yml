@@ -1,0 +1,54 @@
+# Builds the engine on Windows for every push and pull request; a tag "v<version>" (the version in
+# shared/version.h, e.g. v2.0.0-shihab.1) also publishes a release with the package Shihab Styler's installer uses.
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: microsoft/setup-msbuild@v2
+
+      - uses: nuget/setup-nuget@v2
+
+      - name: Restore NuGet packages (WTL)
+        run: nuget restore ShihabStylerEngine.sln
+
+      - name: Build the app (x64) and the engine (x86, x64, ARM64)
+        shell: cmd
+        run: |
+          msbuild ShihabStylerEngine.sln /m /t:app /p:Configuration=Release /p:Platform=x64 || exit /b 1
+          msbuild ShihabStylerEngine.sln /m /t:engine /p:Configuration=Release /p:Platform=Win32 || exit /b 1
+          msbuild ShihabStylerEngine.sln /m /t:engine /p:Configuration=Release /p:Platform=x64 || exit /b 1
+          msbuild ShihabStylerEngine.sln /m /t:engine /p:Configuration=Release /p:Platform=ARM64 || exit /b 1
+
+      - name: Package
+        shell: pwsh
+        run: ./scripts/package.ps1 -Out dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ShihabStylerEngine
+          path: dist/*
+
+      - name: Publish the release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          gh release create $tag (Get-ChildItem dist/*).FullName --title "Shihab Styler Engine $($tag.TrimStart('v'))" `
+            --notes "Engine build for Shihab Styler. Source: this tag. Licence: GPL-3.0. Based on Windhawk by Ramen Software." `
+            $(if ($tag -match '-') { '--prerelease' })

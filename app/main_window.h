@@ -17,7 +17,7 @@ class CMainWindow : public CWindowImpl<CMainWindow, CWindow, CNullTraits>,
                     public CMessageFilter,
                     public CIdleHandler {
    public:
-    DECLARE_WND_CLASS(L"WindhawkDaemon")
+    DECLARE_WND_CLASS(L"ShihabStylerEngineDaemon")
 
     // Custom messages.
     enum {
@@ -26,7 +26,7 @@ class CMainWindow : public CWindowImpl<CMainWindow, CWindow, CNullTraits>,
         UWM_UPDATE_CHECKED,
     };
 
-    // Requests another windhawk.exe instance can hand to the daemon of its
+    // Requests another ShihabStylerEngine.exe instance can hand to the daemon of its
     // session. kExit is only honored by a portable daemon, which is the whole
     // app; a non-portable one exits with the service.
     enum class DaemonCommand {
@@ -126,7 +126,7 @@ class CMainWindow : public CWindowImpl<CMainWindow, CWindow, CNullTraits>,
     std::optional<ULONGLONG> m_lastProfileContentHash;
 
     // Watches the app settings so that changes reach the daemon whichever
-    // process made them, including edits made outside of Windhawk. Signals are
+    // process made them, including edits made outside of Shihab Styler. Signals are
     // deferred through Timer::kAppSettingsReload.
     std::optional<StorageManager::AppConfigChangeNotification>
         m_appConfigChangeNotification;

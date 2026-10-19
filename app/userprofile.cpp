@@ -277,7 +277,7 @@ int CompareVersionPrerelease(std::string_view pre1, std::string_view pre2) {
 // Order two version strings by SemVer precedence: the numeric release parts
 // first, then the pre-release tag (a pre-release is older than its release, so
 // e.g. "2.0.0-alpha.1" < "2.0.0-alpha.2" < "2.0.0-beta.1" < "2.0.0"). Build
-// metadata is not used by Windhawk versions.
+// metadata is not used by engine versions.
 bool version_less_than(std::string_view v1, std::string_view v2) {
     auto split = [](std::string_view v, std::string_view* base,
                     std::string_view* pre) {

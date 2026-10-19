@@ -186,7 +186,7 @@ LSTATUS LoadStoreHive(std::wstring_view sessionId, wil::unique_hkey& hiveOut) {
 
         filePath = MakeHiveFilePath(sessionId).native();
     } catch (...) {
-        // Windhawk's data folder is unknown, so neither is the hive.
+        // The engine's data folder is unknown, so neither is the hive.
         return ERROR_PATH_NOT_FOUND;
     }
 
