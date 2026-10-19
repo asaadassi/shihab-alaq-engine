@@ -18,9 +18,9 @@ build.bat Release ""
 pwsh scripts\package.ps1 -Out dist
 ```
 
-Every push is built by GitHub Actions (`.github/workflows/build.yml`); a tag `v<version>` (the version in
-`shared/version.h`, e.g. `v2.0.0-shihab.1`) publishes the release Shihab Styler's installer downloads, with its
-`SHA256SUMS.txt`.
+Every push is built by GitHub Actions (`.github/workflows/build.yml`). A version in `shared/version.h` that has no
+release yet (e.g. `2.0.0-shihab.1`) is published from `main` as release `v<version>`, tagged at that commit: the
+package Shihab Styler's installer downloads, with its `SHA256SUMS.txt`. Raise the version to make a new release.
 
 ## Layout
 
