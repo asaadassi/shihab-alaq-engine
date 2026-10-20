@@ -48,7 +48,7 @@
 namespace ToolModProcess {
 
 // The app's file name, which a legacy tool mod names in its patterns.
-inline constexpr WCHAR kAppFileName[] = L"ShihabStylerEngine.exe";
+inline constexpr WCHAR kAppFileName[] = L"ShihabAlaqEngine.exe";
 
 // The elevation level a tool mod's host runs at, one per host file name,
 // ordered least to most. The values are what HostLevelBit shifts by, so they
@@ -72,9 +72,9 @@ struct Host {
 };
 
 inline constexpr Host kHosts[] = {
-    {HostLevel::kNormal, L"shihab-styler-mod.exe"},
-    {HostLevel::kUiAccess, L"shihab-styler-mod-uiaccess.exe"},
-    {HostLevel::kElevated, L"shihab-styler-mod-elevated.exe"},
+    {HostLevel::kNormal, L"shihab-alaq-mod.exe"},
+    {HostLevel::kUiAccess, L"shihab-alaq-mod-uiaccess.exe"},
+    {HostLevel::kElevated, L"shihab-alaq-mod-elevated.exe"},
 };
 
 // What a tool mod's include patterns ask for, read from its settings and

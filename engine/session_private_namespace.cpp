@@ -42,9 +42,9 @@ namespace SessionPrivateNamespace {
 int MakeName(WCHAR szPrivateNamespaceName[kPrivateNamespaceMaxLen + 1],
              DWORD dwSessionManagerProcessId) {
     static_assert(kPrivateNamespaceMaxLen + 1 ==
-                  sizeof("ShihabStylerSession1234567890"));
+                  sizeof("ShihabAlaqSession1234567890"));
     int len = swprintf_s(szPrivateNamespaceName, kPrivateNamespaceMaxLen + 1,
-                         L"ShihabStylerSession%u", dwSessionManagerProcessId);
+                         L"ShihabAlaqSession%u", dwSessionManagerProcessId);
     THROW_HR_IF(E_UNEXPECTED, len < 0);
     return len;
 }

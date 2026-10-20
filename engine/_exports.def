@@ -1,4 +1,4 @@
-LIBRARY "shihab-styler-engine.dll"
+LIBRARY "shihab-alaq-engine.dll"
 EXPORTS
 	InjectInit
 	GlobalHookSessionStart

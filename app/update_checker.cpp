@@ -9,7 +9,7 @@
 namespace {
 
 constexpr auto* kUpdateCheckerUrl =
-    L"https://github.com/asaadassi/shihab-styler-releases/releases";
+    L"https://github.com/asaadassi/shihab-alaq-releases/releases";
 
 USHORT GetNativeMachineImpl() {
     using IsWow64Process2_t = BOOL(WINAPI*)(
@@ -62,7 +62,7 @@ CWinHTTPSimpleOptions GetUpdateCheckerOptions(DWORD flags,
     options.sURL = kUpdateCheckerUrl;
     options.bDecompression = true;
 
-    options.sUserAgent = L"ShihabStyler/" VER_FILE_VERSION_WSTR " (";
+    options.sUserAgent = L"ShihabAlaq/" VER_FILE_VERSION_WSTR " (";
     options.sUserAgent += std::to_wstring(GetNativeMachine());
     if (flags & UpdateChecker::kFlagPortable) {
         options.sUserAgent += L"; portable";

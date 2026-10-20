@@ -95,7 +95,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)libraries;$(ProjectDir)..\shared;$(ProjectDir)..\shared\libraries;$(ProjectDir);$(IncludePath)</IncludePath>
-    <TargetName>ShihabStylerEngine</TargetName>
+    <TargetName>ShihabAlaqEngine</TargetName>
     <LibraryPath>$(ProjectDir)..\shared\libraries;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
@@ -103,7 +103,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)libraries;$(ProjectDir)..\shared;$(ProjectDir)..\shared\libraries;$(ProjectDir);$(IncludePath)</IncludePath>
-    <TargetName>ShihabStylerEngine</TargetName>
+    <TargetName>ShihabAlaqEngine</TargetName>
     <LibraryPath>$(ProjectDir)..\shared\libraries;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
@@ -111,13 +111,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)libraries;$(ProjectDir)..\shared;$(ProjectDir)..\shared\libraries;$(ProjectDir);$(IncludePath)</IncludePath>
-    <TargetName>ShihabStylerEngine</TargetName>
+    <TargetName>ShihabAlaqEngine</TargetName>
     <LibraryPath>$(ProjectDir)..\shared\libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(ProjectDir)libraries;$(ProjectDir)..\shared;$(ProjectDir)..\shared\libraries;$(ProjectDir);$(IncludePath)</IncludePath>
-    <TargetName>ShihabStylerEngine</TargetName>
+    <TargetName>ShihabAlaqEngine</TargetName>
     <LibraryPath>$(ProjectDir)..\shared\libraries;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
@@ -125,7 +125,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(ProjectDir)libraries;$(ProjectDir)..\shared;$(ProjectDir)..\shared\libraries;$(ProjectDir);$(IncludePath)</IncludePath>
-    <TargetName>ShihabStylerEngine</TargetName>
+    <TargetName>ShihabAlaqEngine</TargetName>
     <LibraryPath>$(ProjectDir)..\shared\libraries;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
@@ -133,7 +133,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(ProjectDir)libraries;$(ProjectDir)..\shared;$(ProjectDir)..\shared\libraries;$(ProjectDir);$(IncludePath)</IncludePath>
-    <TargetName>ShihabStylerEngine</TargetName>
+    <TargetName>ShihabAlaqEngine</TargetName>
     <LibraryPath>$(ProjectDir)..\shared\libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

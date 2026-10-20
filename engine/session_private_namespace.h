@@ -3,7 +3,7 @@
 namespace SessionPrivateNamespace {
 
 constexpr size_t kPrivateNamespaceMaxLen =
-    sizeof("ShihabStylerSession1234567890") - 1;
+    sizeof("ShihabAlaqSession1234567890") - 1;
 
 // Writes the namespace name and returns its length. Throws if the name doesn't
 // fit in the buffer, so the return value is always a length.

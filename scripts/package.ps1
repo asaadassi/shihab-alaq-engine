@@ -1,8 +1,8 @@
-# Makes the engine package Shihab Styler's installer unpacks:
-#   ShihabStylerEngine.exe, LICENSE, NOTICE.md,
-#   engine\<32|64|arm64>\shihab-styler-engine.dll (+ .lib for compiling mods),
-#   engine\<arch>\symsrv_shihab_styler.dll and msdia140_shihab_styler.dll (symbol loading, Microsoft redistributables)
-# then ShihabStylerEngine-<version>.zip and SHA256SUMS.txt in -Out.
+# Makes the engine package Shihab Alaq's installer unpacks:
+#   ShihabAlaqEngine.exe, LICENSE, NOTICE.md,
+#   engine\<32|64|arm64>\shihab-alaq-engine.dll (+ .lib for compiling mods),
+#   engine\<arch>\symsrv_shihab_alaq.dll and msdia140_shihab_alaq.dll (symbol loading, Microsoft redistributables)
+# then ShihabAlaqEngine-<version>.zip and SHA256SUMS.txt in -Out.
 # Usage (after build): pwsh scripts\package.ps1 -Out dist
 param([string]$Out = "dist")
 $ErrorActionPreference = "Stop"
@@ -18,9 +18,9 @@ $stage = Join-Path $root "$Out\stage"
 if (Test-Path (Join-Path $root $Out)) { Remove-Item (Join-Path $root $Out) -Recurse -Force }
 New-Item -ItemType Directory -Force $stage | Out-Null
 # The app's x64 build lands in x64\Release (the default) or Release, depending on the project settings
-$exe = @("x64\Release\ShihabStylerEngine.exe", "Release\ShihabStylerEngine.exe") | ForEach-Object { Join-Path $root $_ } |
+$exe = @("x64\Release\ShihabAlaqEngine.exe", "Release\ShihabAlaqEngine.exe") | ForEach-Object { Join-Path $root $_ } |
     Where-Object { Test-Path $_ } | Select-Object -First 1
-if (-not $exe) { throw "ShihabStylerEngine.exe not built" }
+if (-not $exe) { throw "ShihabAlaqEngine.exe not built" }
 Copy-Item $exe $stage
 Copy-Item (Join-Path $root "LICENSE") $stage
 Copy-Item (Join-Path $root "NOTICE.md") $stage
@@ -36,20 +36,20 @@ $archs = @{
 foreach ($arch in $archs.Keys) {
     $dir = Join-Path $stage "engine\$arch"
     New-Item -ItemType Directory -Force $dir | Out-Null
-    foreach ($f in "shihab-styler-engine.dll", "shihab-styler-engine.lib") {
+    foreach ($f in "shihab-alaq-engine.dll", "shihab-alaq-engine.lib") {
         Copy-Item (Join-Path $root "Release\$arch\$f") $dir
     }
     $symsrv = Join-Path $kits "$($archs[$arch].Debuggers)\symsrv.dll"
     $msdia = Join-Path $vs ("DIA SDK\bin\" + $(if ($archs[$arch].Dia) { $archs[$arch].Dia + "\" } else { "" }) + "msdia140.dll")
-    foreach ($pair in @(@($symsrv, "symsrv_shihab_styler.dll"), @($msdia, "msdia140_shihab_styler.dll"))) {
+    foreach ($pair in @(@($symsrv, "symsrv_shihab_alaq.dll"), @($msdia, "msdia140_shihab_alaq.dll"))) {
         if (-not (Test-Path $pair[0])) { throw "Missing $($pair[0])" }
         Copy-Item $pair[0] (Join-Path $dir $pair[1])
     }
 }
 
-$zip = Join-Path $root "$Out\ShihabStylerEngine-$version.zip"
+$zip = Join-Path $root "$Out\ShihabAlaqEngine-$version.zip"
 Compress-Archive -Path (Join-Path $stage "*") -DestinationPath $zip
 Remove-Item $stage -Recurse -Force
 $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
-"$hash  ShihabStylerEngine-$version.zip" | Set-Content (Join-Path $root "$Out\SHA256SUMS.txt") -Encoding ascii
-Write-Host "ShihabStylerEngine-$version.zip  $hash"
+"$hash  ShihabAlaqEngine-$version.zip" | Set-Content (Join-Path $root "$Out\SHA256SUMS.txt") -Encoding ascii
+Write-Host "ShihabAlaqEngine-$version.zip  $hash"

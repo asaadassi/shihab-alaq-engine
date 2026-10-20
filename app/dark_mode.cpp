@@ -24,7 +24,7 @@ constexpr PCWSTR kTaskDialogDarkThemeName = L"DarkMode_Explorer";
 bool IsDisabledByEnvVar() {
     static bool disabled = [] {
         WCHAR value[16];
-        DWORD size = GetEnvironmentVariable(L"SHIHAB_STYLER_DISABLE_DARK_MODE",
+        DWORD size = GetEnvironmentVariable(L"SHIHAB_ALAQ_DISABLE_DARK_MODE",
                                             value, ARRAYSIZE(value));
         return size > 0 && size < ARRAYSIZE(value) && wcscmp(value, L"1") == 0;
     }();

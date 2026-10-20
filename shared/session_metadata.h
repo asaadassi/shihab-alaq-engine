@@ -40,7 +40,7 @@ namespace SessionMetadata {
 
 // The container under HKEY_LOCAL_MACHINE, which holds the store whenever the
 // session manager can create it there.
-inline constexpr WCHAR kRootSubKey[] = L"SOFTWARE\\ShihabStylerSessions";
+inline constexpr WCHAR kRootSubKey[] = L"SOFTWARE\\ShihabAlaqSessions";
 
 // A portable session manager without administrative rights is denied that key
 // and puts the store in an application hive instead, whose root is then the

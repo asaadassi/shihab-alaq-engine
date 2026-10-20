@@ -74,7 +74,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                              UOI_TIMERPROC_EXCEPTION_SUPPRESSION, &insanity,
                              sizeof(insanity));
 
-    SetCurrentProcessExplicitAppUserModelID(L"ShihabApp.ShihabStyler.Engine");
+    SetCurrentProcessExplicitAppUserModelID(L"ShihabApp.ShihabAlaq.Engine");
 
     DarkMode::EnableForMenus();
 
@@ -101,7 +101,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
         action = Action::kRestartBg;
     }
     // New action flags should start with "-x-" for compatibility with tool
-    // mods, which skip a ShihabStylerEngine.exe process with such a flag as they skip the
+    // mods, which skip a ShihabAlaqEngine.exe process with such a flag as they skip the
     // ones above. A secondary flag, which only changes how one of the actions
     // runs, needs no prefix: the action's own flag comes with it.
 
@@ -114,7 +114,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
         switch (action) {
             case Action::kDefault:
             case Action::kRunUI:
-                ::MessageBoxA(nullptr, e.what(), "Shihab Styler error",
+                ::MessageBoxA(nullptr, e.what(), "Shihab Alaq error",
                               MB_ICONERROR);
                 break;
 
@@ -167,7 +167,7 @@ void Run(Action action) {
             VERBOSE("Enabling safe mode");
             // Shuts everything down and writes the flag, without starting the
             // UI: the action exists to be elevated, and the unelevated caller
-            // opens the UI itself. That caller is a ShihabStylerEngine.exe under the
+            // opens the UI itself. That caller is a ShihabAlaqEngine.exe under the
             // install directory, so -caller-pid excludes it from the shutdown
             // wait. A failure here is only logged, and reported by the caller.
             ExitAppAndWait(StorageManager::GetInstance().IsPortable(),
@@ -275,7 +275,7 @@ void RunDaemon() {
         if (!Functions::IsRunAsAdmin()) {
             // Elevate for the service start only, and wait for it, so the UI is
             // opened from this process, which is still unelevated.
-            if (RunElevatedStep(L"start the Shihab Styler engine service",
+            if (RunElevatedStep(L"start the Shihab Alaq engine service",
                                 L"-service-start") &&
                 !trayOnly) {
                 UIControl::RunUIOrBringToFront(nullptr);
@@ -289,7 +289,7 @@ void RunDaemon() {
     }
 
     wil::unique_mutex_nothrow mutex(
-        ::CreateMutex(nullptr, TRUE, L"ShihabStylerEngineDaemon"));
+        ::CreateMutex(nullptr, TRUE, L"ShihabAlaqEngineDaemon"));
     THROW_LAST_ERROR_IF_NULL(mutex);
 
     if (GetLastError() == ERROR_ALREADY_EXISTS) {
@@ -331,7 +331,7 @@ void RunDaemon() {
 }
 
 void CheckForUpdates() {
-    // Shihab Styler updates the engine with its own installer.
+    // Shihab Alaq updates the engine with its own installer.
     return;
 
     bool portable = StorageManager::GetInstance().IsPortable();
@@ -517,14 +517,14 @@ void WaitForRunningProcessesToTerminate(DWORD timeout,
             }
 
             if (windhawkBgOnly) {
-                if (_wcsicmp(pe.szExeFile, L"ShihabStylerEngine.exe") != 0) {
+                if (_wcsicmp(pe.szExeFile, L"ShihabAlaqEngine.exe") != 0) {
                     continue;
                 }
 
                 WCHAR toolModMutexName[sizeof(
-                    "Global\\shihab-styler-tool-mod-pid=1234567890")];
+                    "Global\\shihab-alaq-tool-mod-pid=1234567890")];
                 swprintf_s(toolModMutexName,
-                           L"Global\\shihab-styler-tool-mod-pid=%u",
+                           L"Global\\shihab-alaq-tool-mod-pid=%u",
                            pe.th32ProcessID);
                 if (wil::unique_mutex_nothrow(
                         ::OpenMutex(SYNCHRONIZE, FALSE, toolModMutexName))) {
@@ -538,8 +538,8 @@ void WaitForRunningProcessesToTerminate(DWORD timeout,
                     continue;
                 }
 
-                constexpr WCHAR kToolModHostPrefix[] = L"shihab-styler-mod-";
-                if (_wcsicmp(pe.szExeFile, L"shihab-styler-mod.exe") == 0 ||
+                constexpr WCHAR kToolModHostPrefix[] = L"shihab-alaq-mod-";
+                if (_wcsicmp(pe.szExeFile, L"shihab-alaq-mod.exe") == 0 ||
                     _wcsnicmp(pe.szExeFile, kToolModHostPrefix,
                               _countof(kToolModHostPrefix) - 1) == 0) {
                     // Skip tool mod hosts, which outlive the app and terminate
@@ -621,7 +621,7 @@ void WaitForEngineToUnload() {
 
     DWORD startTickCount = GetTickCount();
 
-    while (GetModuleHandle(L"shihab-styler-engine.dll")) {
+    while (GetModuleHandle(L"shihab-alaq-engine.dll")) {
         if (GetTickCount() - startTickCount >= kTimeout) {
             VERBOSE(L"Timed out waiting for the engine to unload");
             return;
@@ -718,7 +718,7 @@ bool RunElevatedStep(PCWSTR what, PCWSTR parameters) {
             message += std::format(L"\n\n{}", description);
         }
 
-        ::MessageBox(nullptr, message.c_str(), L"Shihab Styler error", MB_ICONERROR);
+        ::MessageBox(nullptr, message.c_str(), L"Shihab Alaq error", MB_ICONERROR);
         return false;
     }
 
@@ -728,7 +728,7 @@ bool RunElevatedStep(PCWSTR what, PCWSTR parameters) {
 bool PostCommandToRunningDaemon(CMainWindow::DaemonCommand command) {
     // Window stations are per session, so this only ever finds the daemon of
     // this logon session.
-    CWindow hDaemonWnd(FindWindow(L"ShihabStylerEngineDaemon", nullptr));
+    CWindow hDaemonWnd(FindWindow(L"ShihabAlaqEngineDaemon", nullptr));
     if (!hDaemonWnd) {
         return false;
     }

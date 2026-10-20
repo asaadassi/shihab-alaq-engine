@@ -110,7 +110,7 @@ void CustomizationSession::Start(
     bool threadAttachExempt,
     wil::unique_process_handle sessionManagerProcess,
     wil::unique_mutex_nothrow sessionMutex) {
-    std::wstring semaphoreName = L"ShihabStylerCustomizationSessionSemaphore-pid=" +
+    std::wstring semaphoreName = L"ShihabAlaqCustomizationSessionSemaphore-pid=" +
                                  std::to_wstring(GetCurrentProcessId());
     wil::unique_semaphore semaphore(1, 1, semaphoreName.c_str());
 
@@ -510,7 +510,7 @@ void CustomizationSession::StartInitialized(
     }
 
     Functions::SetThreadDescriptionIfAvailable(
-        thread.get(), L"ShihabStylerMainLoopThreadAttachExempt");
+        thread.get(), L"ShihabAlaqMainLoopThreadAttachExempt");
 }
 
 DWORD CustomizationSession::
@@ -578,7 +578,7 @@ DWORD CustomizationSession::
     }
 
     Functions::SetThreadDescriptionIfAvailable(thread.get(),
-                                               L"ShihabStylerMainLoop");
+                                               L"ShihabAlaqMainLoop");
 
     return lastThreadExitCode;
 }

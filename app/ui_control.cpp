@@ -30,7 +30,7 @@ const json uiSettings = {
     {"editor.tabSize", 4},
     {"editor.insertSpaces", true},
     {"editor.detectIndentation", false},
-    {"clangd.path", "${env:SHIHAB_STYLER_COMPILER_PATH}\\bin\\clangd.exe"},
+    {"clangd.path", "${env:SHIHAB_ALAQ_COMPILER_PATH}\\bin\\clangd.exe"},
     {"clangd.arguments", {"-header-insertion=never"}},
     {"clangd.checkUpdates", false},
     {"window.menuBarVisibility", "compact"},
@@ -47,7 +47,7 @@ const json uiSettings = {
 
 const json uiSettingsToMigrate = {
     {"clangd.path",
-     "${env:SHIHAB_STYLER_UI_PATH}"
+     "${env:SHIHAB_ALAQ_UI_PATH}"
      "\\resources\\app\\extensions\\clangd\\clangd\\bin\\clangd.exe"},
 };
 
@@ -145,9 +145,9 @@ std::wstring BuildUIProcessEnvBlock(const std::filesystem::path& uiDataPath,
     for (PCWSTR env = currentEnv.get(); *env; env += wcslen(env) + 1) {
         if (startsWithNoCase(env, L"ELECTRON_") ||
             startsWithNoCase(env, L"VSCODE_") ||
-            startsWithNoCase(env, L"SHIHAB_STYLER_UI_PATH=") ||
-            startsWithNoCase(env, L"SHIHAB_STYLER_COMPILER_PATH=") ||
-            startsWithNoCase(env, L"SHIHAB_STYLER_USER_SID=")) {
+            startsWithNoCase(env, L"SHIHAB_ALAQ_UI_PATH=") ||
+            startsWithNoCase(env, L"SHIHAB_ALAQ_COMPILER_PATH=") ||
+            startsWithNoCase(env, L"SHIHAB_ALAQ_USER_SID=")) {
             continue;
         }
 
@@ -161,22 +161,22 @@ std::wstring BuildUIProcessEnvBlock(const std::filesystem::path& uiDataPath,
     envBlock += uiDataPath.native();
     envBlock += L'\0';
 
-    // SHIHAB_STYLER_UI_PATH: Used to locate the clangd executable.
-    envBlock += L"SHIHAB_STYLER_UI_PATH=";
+    // SHIHAB_ALAQ_UI_PATH: Used to locate the clangd executable.
+    envBlock += L"SHIHAB_ALAQ_UI_PATH=";
     envBlock += uiPath.native();
     envBlock += L'\0';
 
-    // SHIHAB_STYLER_COMPILER_PATH: Used to locate the compiler.
-    envBlock += L"SHIHAB_STYLER_COMPILER_PATH=";
+    // SHIHAB_ALAQ_COMPILER_PATH: Used to locate the compiler.
+    envBlock += L"SHIHAB_ALAQ_COMPILER_PATH=";
     envBlock += compilerPath.native();
     envBlock += L'\0';
 
-    // SHIHAB_STYLER_USER_SID: The account whose mod configurations the UI reads and
+    // SHIHAB_ALAQ_USER_SID: The account whose mod configurations the UI reads and
     // writes. Without it, the UI acts for the account it runs as. It becomes a
     // registry key name, so only a SID in canonical form is passed on.
     if (userSid) {
         if (IsCanonicalSidString(userSid)) {
-            envBlock += L"SHIHAB_STYLER_USER_SID=";
+            envBlock += L"SHIHAB_ALAQ_USER_SID=";
             envBlock += userSid;
             envBlock += L'\0';
         } else {
@@ -258,17 +258,17 @@ void RunVSCodeUI(PCWSTR userSid) {
 // when the environment variable selects it for the whole app.
 bool UseVSCodiumUI(bool legacyUI) {
     return legacyUI || wil::TryGetEnvironmentVariableW<std::wstring>(
-                           L"SHIHAB_STYLER_USE_VSCODIUM_UI") == L"1";
+                           L"SHIHAB_ALAQ_USE_VSCODIUM_UI") == L"1";
 }
 
-// Shihab Styler (ShihabStyler.exe next to this exe) is a separate program that
+// Shihab Alaq (ShihabAlaq.exe next to this exe) is a separate program that
 // asks for administrator rights in its manifest, so it's started with
 // ShellExecuteEx (CreateProcess can't show the elevation prompt). It keeps a
 // single instance itself: a second launch brings the open window to the front.
-void RunStylerUI() {
+void RunAlaqUI() {
     auto modulePath = wil::GetModuleFileName<std::wstring>();
     auto uiExePath =
-        std::filesystem::path(modulePath).parent_path() / L"ShihabStyler.exe";
+        std::filesystem::path(modulePath).parent_path() / L"ShihabAlaq.exe";
     auto uiDir = uiExePath.parent_path();
 
     SHELLEXECUTEINFO sei{sizeof(sei)};
@@ -288,7 +288,7 @@ void RunUI(bool legacyUI, PCWSTR userSid) {
     if (UseVSCodiumUI(legacyUI)) {
         RunVSCodeUI(userSid);
     } else {
-        RunStylerUI();
+        RunAlaqUI();
     }
 }
 
@@ -376,7 +376,7 @@ bool BringUIToFront(bool legacyUI) {
     // missing or hidden window counts as not running, so the caller launches it
     // (which also brings it to front via the single-instance handoff).
     if (!UseVSCodiumUI(legacyUI)) {
-        // Shihab Styler's window has no fixed class name: report it as not
+        // Shihab Alaq's window has no fixed class name: report it as not
         // running, and the launch that follows reaches the open copy through
         // its single-instance handoff, which brings it to the front.
         return false;

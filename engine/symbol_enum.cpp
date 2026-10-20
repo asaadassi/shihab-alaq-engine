@@ -255,7 +255,7 @@ HMODULE WINAPI MsdiaLoadLibraryExWHook(LPCWSTR lpLibFileName,
         dwNewFlags &= ~LOAD_LIBRARY_SEARCH_SYSTEM32;
         dwNewFlags &= ~LOAD_LIBRARY_SEARCH_DEFAULT_DIRS;
 
-        auto symsrvPath = enginePath / L"symsrv_shihab_styler.dll";
+        auto symsrvPath = enginePath / L"symsrv_shihab_alaq.dll";
         HMODULE symsrvModule =
             LoadLibraryExW(symsrvPath.c_str(), hFile, dwNewFlags);
         if (!symsrvModule) {
@@ -643,7 +643,7 @@ void SymbolEnum::InitModuleInfo(HMODULE module) {
 
 wil::com_ptr<IDiaDataSource> SymbolEnum::LoadMsdia() {
     auto enginePath = StorageManager::GetInstance().GetEnginePath();
-    auto msdiaPath = enginePath / L"msdia140_shihab_styler.dll";
+    auto msdiaPath = enginePath / L"msdia140_shihab_alaq.dll";
 
     m_msdiaModule.reset(LoadLibraryEx(msdiaPath.c_str(), nullptr,
                                       LOAD_WITH_ALTERED_SEARCH_PATH));

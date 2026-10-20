@@ -290,7 +290,7 @@ int CMainWindow::OnCreate(LPCREATESTRUCT lpCreateStruct) {
             InitForNonPortableVersion();
         }
     } catch (const std::exception& e) {
-        ::MessageBoxA(nullptr, e.what(), "Could not initialize the Shihab Styler engine",
+        ::MessageBoxA(nullptr, e.what(), "Could not initialize the Shihab Alaq engine",
                       MB_ICONERROR);
         return -1;
     }
@@ -311,7 +311,7 @@ int CMainWindow::OnCreate(LPCREATESTRUCT lpCreateStruct) {
     }
 
     if (!LoadSettings()) {
-        ::MessageBox(nullptr, L"Could not load settings", L"Shihab Styler error",
+        ::MessageBox(nullptr, L"Could not load settings", L"Shihab Alaq error",
                      MB_ICONERROR);
     }
 
@@ -762,7 +762,7 @@ bool CMainWindow::LoadSettings() {
         }
 
         hideTrayIcon = settings->GetInt(L"HideTrayIcon").value_or(0);
-        // Shihab Styler updates the engine with its own installer, so the
+        // Shihab Alaq updates the engine with its own installer, so the
         // engine never checks for updates itself.
         disableUpdateCheck = true;
 
@@ -1054,7 +1054,7 @@ void CMainWindow::StopService(HWND hWnd) {
                                 std::string msg =
                                     "Exiting failed with the error below. If "
                                     "nothing else works, you can choose to "
-                                    "send an exit signal to the Shihab Styler "
+                                    "send an exit signal to the Shihab Alaq "
                                     "service. Send exit signal?\n\nError:\n";
 
                                 msg += e.what();
@@ -1160,12 +1160,12 @@ void CMainWindow::ResetLastUpdateTime() {
 
 void CMainWindow::OpenUpdatePage() {
     PCWSTR url =
-        L"https://github.com/asaadassi/shihab-styler-releases/releases";
+        L"https://github.com/asaadassi/shihab-alaq-releases/releases";
 
     if ((int)(UINT_PTR)ShellExecute(m_hWnd, nullptr, url, nullptr, nullptr,
                                     SW_SHOWNORMAL) <= 32) {
         MessageBox(
-            L"Could not open the update page, please update Shihab Styler manually",
+            L"Could not open the update page, please update Shihab Alaq manually",
             L"Error", MB_ICONERROR);
     }
 }
