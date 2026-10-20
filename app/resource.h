@@ -9,6 +9,7 @@
 #define IDD_TOOLKIT                     0x84
 #define IDS_TRAY_OPEN                   0x90
 #define IDS_TRAY_LOADED_MODS            0x91
+#define IDS_TRAY_DISABLE_ALL_MODS       0x92
 #define IDS_TRAY_TOOLKIT                0xA0
 #define IDS_TRAY_EXIT                   0xB0
 #define IDS_EXITDLG_TITLE               0xB1
@@ -48,6 +49,9 @@
 #define IDS_SAFE_MODE_TEXT              0x126
 #define IDS_SAFE_MODE_DETECTED_TITLE    0x130
 #define IDS_SAFE_MODE_DETECTED_TEXT     0x131
+#define IDS_CRASH_GUARD_MOD_DISABLED    0x132
+#define IDS_CRASH_GUARD_EXPLORER_DISABLED 0x133
+#define IDS_CRASH_GUARD_ALL_DISABLED    0x134
 #define IDC_TASK_LIST                   1001
 #define IDC_TOOLKIT_EXPLANATION         1002
 #define IDC_TOOLKIT_LOADED_MODS         1003
@@ -59,7 +63,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        0x132
+#define _APS_NEXT_RESOURCE_VALUE        0x135
 #define _APS_NEXT_COMMAND_VALUE         32775
 #define _APS_NEXT_CONTROL_VALUE         1007
 #define _APS_NEXT_SYMED_VALUE           101

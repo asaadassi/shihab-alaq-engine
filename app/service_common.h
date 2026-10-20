@@ -18,6 +18,11 @@ static inline constexpr WCHAR kEmergencyStopEventName[] =
 static inline constexpr WCHAR kSafeModeStopEventName[] =
     L"Global\\ShihabAlaqServiceSafeModeStopEvent";
 
+// Shihab Alaq: set by the tray icon's "Turn off all mods"; the service, which
+// may write the mods' configuration, turns them off.
+static inline constexpr WCHAR kDisableAllModsEventName[] =
+    L"Global\\ShihabAlaqServiceDisableAllModsEvent";
+
 struct ServiceInfo {
     DWORD version;
     DWORD processId;

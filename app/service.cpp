@@ -5,6 +5,7 @@
 #include "engine_control.h"
 #include "functions.h"
 #include "logger.h"
+#include "mod_crash_guard.h"
 #include "service_common.h"
 #include "session_processes.h"
 #include "storage_manager.h"
@@ -164,6 +165,8 @@ class ServiceInstance {
         wil::unique_event emergencyStopEvent;
         wil::unique_event safeModeStopEvent;
         wil::unique_event sessionChangeEvent;
+        wil::unique_event disableAllModsEvent;
+        std::optional<ModCrashGuard> crashGuard;
         std::optional<EngineControl> engineControl;
 
         struct SessionChange {
@@ -294,6 +297,21 @@ VOID ServiceInstance::SvcInit(DWORD dwArgc, LPTSTR* lpszArgv) {
         CreateEvent(nullptr, FALSE, FALSE, nullptr));
     THROW_LAST_ERROR_IF_NULL(resources.sessionChangeEvent);
 
+    resources.disableAllModsEvent.reset(
+        Functions::CreateEventForMediumIntegrity(
+            ServiceCommon::kDisableAllModsEventName, FALSE));
+    THROW_LAST_ERROR_IF_NULL(resources.disableAllModsEvent);
+
+    // Shihab Alaq: before any mod loads, so that a mod which crashed a program
+    // before the last shutdown is already off. Without the guard the engine
+    // still runs.
+    try {
+        resources.crashGuard.emplace();
+        resources.crashGuard->HandleNewEvents();
+    } catch (const std::exception& e) {
+        LOG(L"Crash guard failed: %S", e.what());
+    }
+
     auto settings =
         StorageManager::GetInstance().GetAppConfig(L"Settings", false);
 
@@ -331,13 +349,18 @@ VOID ServiceInstance::SvcRun(DWORD dwArgc, LPTSTR* lpszArgv) {
         resources.emergencyStopEvent.get(),
         resources.safeModeStopEvent.get(),
         resources.sessionChangeEvent.get(),
+        resources.disableAllModsEvent.get(),
+        // Last, and only waited on when the guard started.
+        resources.crashGuard ? resources.crashGuard->GetEventHandle() : nullptr,
     };
+    DWORD eventCount = static_cast<DWORD>(
+        resources.crashGuard ? ARRAYSIZE(events) : ARRAYSIZE(events) - 1);
 
     while (true) {
         bool keepLooping = false;
 
-        DWORD dwWaitResult = WaitForMultipleObjectsEx(ARRAYSIZE(events), events,
-                                                      FALSE, 1000, FALSE);
+        DWORD dwWaitResult =
+            WaitForMultipleObjectsEx(eventCount, events, FALSE, 1000, FALSE);
         switch (dwWaitResult) {
             case WAIT_FAILED:
                 THROW_LAST_ERROR();
@@ -376,6 +399,31 @@ VOID ServiceInstance::SvcRun(DWORD dwArgc, LPTSTR* lpszArgv) {
 
             case WAIT_OBJECT_0 + 4:
                 VERBOSE(L"Received session change event");
+
+                keepLooping = true;
+                break;
+
+            case WAIT_OBJECT_0 + 5:
+                LOG(L"Received disable all mods event");
+
+                try {
+                    ModCrashGuard::DisableAllMods(L"user");
+                } catch (const std::exception& e) {
+                    LOG(L"Disabling all mods failed: %S", e.what());
+                }
+
+                keepLooping = true;
+                break;
+
+            case WAIT_OBJECT_0 + 6:
+                try {
+                    resources.crashGuard->HandleNewEvents();
+                } catch (const std::exception& e) {
+                    // The handle may stay signaled, so stop waiting on it
+                    // rather than spin; the next start subscribes again.
+                    LOG(L"Crash guard failed: %S", e.what());
+                    eventCount = static_cast<DWORD>(ARRAYSIZE(events) - 1);
+                }
 
                 keepLooping = true;
                 break;

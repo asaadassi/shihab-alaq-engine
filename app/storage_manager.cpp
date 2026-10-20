@@ -203,6 +203,51 @@ std::unique_ptr<PortableSettings> StorageManager::GetEngineModConfig(
     return std::make_unique<RegistrySettings>(hkey, subKey.c_str(), write);
 }
 
+void StorageManager::EnumEngineMods(std::function<void(PCWSTR)> enumCallback) {
+    std::filesystem::path engineIniFilePath = enginePath / L"engine.ini";
+    auto storage =
+        IniFileSettings(engineIniFilePath.c_str(), L"Storage", false);
+
+    if (storage.GetInt(L"Portable").value_or(0)) {
+        auto modsConfigPath =
+            PathFromStorage(storage, L"AppDataPath", enginePath) / L"Mods";
+        std::error_code ec;
+        for (const auto& entry :
+             std::filesystem::directory_iterator(modsConfigPath, ec)) {
+            if (entry.is_regular_file() && entry.path().extension() == L".ini") {
+                enumCallback(entry.path().stem().c_str());
+            }
+        }
+        return;
+    }
+
+    auto [hkey, subKey] = RegistryKeyFromStorage(storage);
+    subKey += L"\\Mods";
+
+    // Opened without creating: no mods yet is no key yet.
+    wil::unique_hkey modsKey;
+    LSTATUS error = RegOpenKeyEx(hkey, subKey.c_str(), 0,
+                                 KEY_READ | KEY_WOW64_64KEY, &modsKey);
+    if (error == ERROR_FILE_NOT_FOUND) {
+        return;
+    }
+    THROW_IF_WIN32_ERROR(error);
+
+    // A key name is at most 255 characters.
+    WCHAR name[256];
+    for (DWORD index = 0;; index++) {
+        DWORD nameLength = ARRAYSIZE(name);
+        error = RegEnumKeyEx(modsKey.get(), index, name, &nameLength, nullptr,
+                             nullptr, nullptr, nullptr);
+        if (error == ERROR_NO_MORE_ITEMS) {
+            break;
+        }
+        THROW_IF_WIN32_ERROR(error);
+
+        enumCallback(name);
+    }
+}
+
 StorageManager::AppConfigChangeNotification::AppConfigChangeNotification(
     PCWSTR section) {
     auto& storageManager = GetInstance();

@@ -38,6 +38,10 @@ class StorageManager {
     std::unique_ptr<PortableSettings> GetEngineModConfig(PCWSTR modName,
                                                          bool write);
 
+    // Shihab Alaq: the names of the mods in the engine's storage, as
+    // GetEngineModConfig takes them (for the crash guard).
+    void EnumEngineMods(std::function<void(PCWSTR)> enumCallback);
+
     // Signals when an app config section changes, whichever process wrote it.
     // Portable installs can only watch the directory holding settings.ini, so
     // they also signal for unrelated files in it. One-shot; re-arm with

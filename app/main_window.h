@@ -99,6 +99,10 @@ class CMainWindow : public CWindowImpl<CMainWindow, CWindow, CNullTraits>,
     void ShowLoadedModsDialog();
     void ShowToolkitDialog(bool triggeredBySystemInstability = false);
     void SwitchToSafeMode();
+    void DisableAllMods();
+    void ShowCrashGuardNotice(const std::wstring& reason,
+                              const std::wstring& modName,
+                              const std::wstring& program);
     void HandleExplorerCrash(int explorerCrashCount);
 
     bool m_trayOnly;
@@ -139,6 +143,8 @@ class CMainWindow : public CWindowImpl<CMainWindow, CWindow, CNullTraits>,
     bool m_dontAutoShowToolkit = true;
     bool m_disableToolkitHotkey = true;
     int m_modTasksDlgDelay = CTaskManagerDlg::kAutonomousModeShowDelayDefault;
+    // Shihab Alaq: the crash guard notice last seen (CrashGuardNotice).
+    std::optional<int> m_crashGuardNotice;
 
     // Shown automatically when mods are doing tasks such as initializing or
     // loading symbols.
