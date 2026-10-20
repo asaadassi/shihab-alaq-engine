@@ -5,7 +5,7 @@ The engine of [Shihab Alaq](https://shihab.app/): a Windows service and a small 
 changes. It is a modified version of the [Windhawk](https://github.com/ramensoftware/windhawk) engine by Ramen
 Software, licensed under **GPL-3.0** (see [`NOTICE.md`](NOTICE.md) and [`LICENSE`](LICENSE)).
 
-محرّك Shihab Alaq: خدمة ويندوز وبرنامج صغير بجانب الساعة، يحمّلان الإضافات في برامج ويندوز ويعيدان تحميلها عند
+محرّك شهاب ألق: خدمة ويندوز وبرنامج صغير بجانب الساعة، يحمّلان الإضافات في برامج ويندوز ويعيدان تحميلها عند
 تغيير إعداداتها. مبني على Windhawk، ومرخّص برخصة GPL-3.0.
 
 ## Build

@@ -18,5 +18,5 @@ and `shared/libraries`, each with its licence text where its authors provided on
 
 ---
 
-محرّك Shihab Alaq نسخة معدّلة من محرّك Windhawk من Ramen Software (Michael Maltsev)، وموزَّع برخصة GNU GPL
+محرّك شهاب ألق نسخة معدّلة من محرّك Windhawk من Ramen Software (Michael Maltsev)، وموزَّع برخصة GNU GPL
 الإصدار 3. أول التزام في هذا المستودع هو الكود الأصلي كما هو، والتعديلات بعده.
