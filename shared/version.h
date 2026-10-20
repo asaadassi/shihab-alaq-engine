@@ -12,7 +12,7 @@
 // FILEVERSION tuple) and VER_FILE_VERSION_LONG stay strictly numeric.
 // Shihab Alaq keeps the upstream Windhawk version numbers (mods compile against them as
 // WH_WINDHAWK_VERSION) and marks its own builds with "-shihab.N".
-#define VERSION_PRERELEASE          "-shihab.2"
+#define VERSION_PRERELEASE          "-shihab.3"
 
 // etc.
 #define STRINGIZE2(s)               #s
