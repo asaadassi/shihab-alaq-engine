@@ -34,6 +34,31 @@ std::filesystem::path PathFromStorage(
     return (baseFolderPath / expandedPath).lexically_normal();
 }
 
+// Shihab Alaq: the root key and the subkey named by a RegistryKey value, as
+// the constructor below reads it.
+std::pair<HKEY, std::wstring> RegistryKeyFromStorage(
+    const PortableSettings& storage) {
+    std::wstring registryKey = storage.GetString(L"RegistryKey").value_or(L"");
+    auto firstBackslash = registryKey.find(L'\\');
+    if (firstBackslash == registryKey.npos) {
+        throw std::runtime_error("Invalid RegistryKey value");
+    }
+
+    std::wstring baseKey = registryKey.substr(0, firstBackslash);
+    HKEY hkey;
+    if (baseKey == L"HKEY_CURRENT_USER" || baseKey == L"HKCU") {
+        hkey = HKEY_CURRENT_USER;
+    } else if (baseKey == L"HKEY_USERS" || baseKey == L"HKU") {
+        hkey = HKEY_USERS;
+    } else if (baseKey == L"HKEY_LOCAL_MACHINE" || baseKey == L"HKLM") {
+        hkey = HKEY_LOCAL_MACHINE;
+    } else {
+        throw std::runtime_error("Unsupported RegistryKey value");
+    }
+
+    return {hkey, registryKey.substr(firstBackslash + 1)};
+}
+
 }  // namespace
 
 // static
@@ -194,6 +219,74 @@ StorageManager::StorageManager() {
 }
 
 StorageManager::~StorageManager() = default;
+
+std::unique_ptr<PortableSettings> StorageManager::GetEngineModConfig(
+    PCWSTR modName,
+    bool write) {
+    std::filesystem::path engineIniFilePath = enginePath / L"engine.ini";
+    auto storage =
+        IniFileSettings(engineIniFilePath.c_str(), L"Storage", false);
+
+    if (storage.GetInt(L"Portable").value_or(0)) {
+        std::wstring iniFileName = modName;
+        iniFileName += L".ini";
+        auto modConfigPath =
+            PathFromStorage(storage, L"AppDataPath", enginePath) / L"Mods" /
+            iniFileName;
+        return std::make_unique<IniFileSettings>(modConfigPath.c_str(), L"Mod",
+                                                 write);
+    }
+
+    auto [hkey, subKey] = RegistryKeyFromStorage(storage);
+    subKey += L"\\Mods\\";
+    subKey += modName;
+    return std::make_unique<RegistrySettings>(hkey, subKey.c_str(), write);
+}
+
+void StorageManager::EnumEngineMods(std::function<void(PCWSTR)> enumCallback) {
+    std::filesystem::path engineIniFilePath = enginePath / L"engine.ini";
+    auto storage =
+        IniFileSettings(engineIniFilePath.c_str(), L"Storage", false);
+
+    if (storage.GetInt(L"Portable").value_or(0)) {
+        auto modsConfigPath =
+            PathFromStorage(storage, L"AppDataPath", enginePath) / L"Mods";
+        std::error_code ec;
+        for (const auto& entry :
+             std::filesystem::directory_iterator(modsConfigPath, ec)) {
+            if (entry.is_regular_file() && entry.path().extension() == L".ini") {
+                enumCallback(entry.path().stem().c_str());
+            }
+        }
+        return;
+    }
+
+    auto [hkey, subKey] = RegistryKeyFromStorage(storage);
+    subKey += L"\\Mods";
+
+    // Opened without creating: no mods yet is no key yet.
+    wil::unique_hkey modsKey;
+    LSTATUS error = RegOpenKeyEx(hkey, subKey.c_str(), 0,
+                                 KEY_READ | KEY_WOW64_64KEY, &modsKey);
+    if (error == ERROR_FILE_NOT_FOUND) {
+        return;
+    }
+    THROW_IF_WIN32_ERROR(error);
+
+    // A key name is at most 255 characters.
+    WCHAR name[256];
+    for (DWORD index = 0;; index++) {
+        DWORD nameLength = ARRAYSIZE(name);
+        error = RegEnumKeyEx(modsKey.get(), index, name, &nameLength, nullptr,
+                             nullptr, nullptr, nullptr);
+        if (error == ERROR_NO_MORE_ITEMS) {
+            break;
+        }
+        THROW_IF_WIN32_ERROR(error);
+
+        enumCallback(name);
+    }
+}
 
 std::filesystem::path StorageManager::GetEngineAppDataPath() {
     return appDataPath / L"Engine";

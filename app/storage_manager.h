@@ -25,6 +25,12 @@ class StorageManager {
     std::filesystem::path GetEditorWorkspacePath();
     std::filesystem::path GetUserProfileJsonPath();
 
+    // Shihab Alaq: a mod's configuration in the engine's storage (named by
+    // engine.ini), and the names of the mods there, for the crash guard.
+    std::unique_ptr<PortableSettings> GetEngineModConfig(PCWSTR modName,
+                                                         bool write);
+    void EnumEngineMods(std::function<void(PCWSTR)> enumCallback);
+
     class ModMetadataChangeNotification {
        public:
         ModMetadataChangeNotification(PCWSTR metadataCategory);

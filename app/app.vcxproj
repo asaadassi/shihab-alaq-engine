@@ -366,6 +366,7 @@
     <ClCompile Include="..\shared\portable_settings.cpp" />
     <ClCompile Include="app.cpp" />
     <ClCompile Include="engine_control.cpp" />
+    <ClCompile Include="mod_crash_guard.cpp" />
     <ClCompile Include="event_viewer_crash_monitor.cpp" />
     <ClCompile Include="functions.cpp" />
     <ClCompile Include="logger.cpp" />
@@ -392,6 +393,7 @@
     <ClInclude Include="..\shared\portable_settings.h" />
     <ClInclude Include="..\shared\version.h" />
     <ClInclude Include="engine_control.h" />
+    <ClInclude Include="mod_crash_guard.h" />
     <ClInclude Include="event_viewer_crash_monitor.h" />
     <ClInclude Include="functions.h" />
     <ClInclude Include="logger.h" />

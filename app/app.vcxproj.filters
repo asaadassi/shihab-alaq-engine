@@ -63,6 +63,9 @@
     <ClCompile Include="toolkit_dlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mod_crash_guard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="event_viewer_crash_monitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -123,6 +126,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="toolkit_dlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mod_crash_guard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="event_viewer_crash_monitor.h">

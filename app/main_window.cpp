@@ -4,6 +4,7 @@
 
 #include "functions.h"
 #include "logger.h"
+#include "mod_crash_guard.h"
 #include "resource.h"
 #include "ui_control.h"
 #include "version.h"
@@ -388,6 +389,7 @@ LRESULT CMainWindow::OnTrayIcon(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         kOpenUI,
         kOpenUpdatePage,
         kModTaskManager,
+        kDisableAllMods,
         kToolkit,
         kExit,
     };
@@ -404,6 +406,10 @@ LRESULT CMainWindow::OnTrayIcon(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         menu.AppendMenu(MF_STRING,
                         static_cast<UINT_PTR>(Action::kModTaskManager),
                         Functions::LoadStrFromRsrc(IDS_TRAY_LOADED_MODS));
+        // Shihab Alaq: one click turns every mod off.
+        menu.AppendMenu(MF_STRING,
+                        static_cast<UINT_PTR>(Action::kDisableAllMods),
+                        Functions::LoadStrFromRsrc(IDS_TRAY_DISABLE_ALL_MODS));
         menu.AppendMenu(
             MF_STRING, static_cast<UINT_PTR>(Action::kToolkit),
             (std::wstring(Functions::LoadStrFromRsrc(IDS_TRAY_TOOLKIT)) +
@@ -454,6 +460,10 @@ LRESULT CMainWindow::OnTrayIcon(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
         case Action::kModTaskManager:
             ShowLoadedModsDialog();
+            break;
+
+        case Action::kDisableAllMods:
+            DisableAllMods();
             break;
 
         case Action::kToolkit:
@@ -607,6 +617,10 @@ void CMainWindow::LoadSettings() {
     bool dontAutoShowToolkit;
     bool disableToolkitHotkey;
     int modTasksDlgDelay;
+    int crashGuardNotice;
+    std::wstring crashGuardNoticeReason;
+    std::wstring crashGuardNoticeMod;
+    std::wstring crashGuardNoticeProgram;
 
     try {
         auto settings =
@@ -638,6 +652,15 @@ void CMainWindow::LoadSettings() {
         modTasksDlgDelay =
             settings->GetInt(L"ModTasksDialogDelay")
                 .value_or(CTaskManagerDlg::kAutonomousModeShowDelayDefault);
+
+        // Shihab Alaq: written by the crash guard (ModCrashGuard).
+        crashGuardNotice = settings->GetInt(L"CrashGuardNotice").value_or(0);
+        crashGuardNoticeReason =
+            settings->GetString(L"CrashGuardNoticeReason").value_or(L"");
+        crashGuardNoticeMod =
+            settings->GetString(L"CrashGuardNoticeMod").value_or(L"");
+        crashGuardNoticeProgram =
+            settings->GetString(L"CrashGuardNoticeProgram").value_or(L"");
     } catch (const std::exception& e) {
         ::MessageBoxA(nullptr, e.what(), "Could not load settings",
                       MB_ICONERROR);
@@ -724,6 +747,14 @@ void CMainWindow::LoadSettings() {
     m_disableToolkitHotkey = disableToolkitHotkey;
 
     m_modTasksDlgDelay = modTasksDlgDelay;
+
+    // A notice written since the last read. The first read only takes the
+    // current one as seen, so a start doesn't repeat an old notice.
+    if (m_crashGuardNotice && crashGuardNotice != *m_crashGuardNotice) {
+        ShowCrashGuardNotice(crashGuardNoticeReason, crashGuardNoticeMod,
+                             crashGuardNoticeProgram);
+    }
+    m_crashGuardNotice = crashGuardNotice;
 }
 
 void CMainWindow::NotifyAboutAvailableUpdates(
@@ -1125,6 +1156,52 @@ void CMainWindow::SwitchToSafeMode() {
 
         namedEvent.SetEvent();
     }
+}
+
+void CMainWindow::DisableAllMods() {
+    try {
+        if (m_portable) {
+            // No service: this process may write the mods' configuration, and
+            // reads the notice right after.
+            ModCrashGuard::DisableAllMods(L"user");
+            LoadSettings();
+        } else {
+            // The service writes the mods' configuration and then the notice.
+            wil::unique_event namedEvent(
+                ::OpenEvent(EVENT_MODIFY_STATE, FALSE,
+                            ServiceCommon::kDisableAllModsEventName));
+            THROW_LAST_ERROR_IF_NULL(namedEvent);
+
+            namedEvent.SetEvent();
+        }
+    } catch (const std::exception& e) {
+        ::MessageBoxA(m_hWnd, e.what(), "Error", MB_ICONERROR);
+    }
+}
+
+void CMainWindow::ShowCrashGuardNotice(const std::wstring& reason,
+                                       const std::wstring& modName,
+                                       const std::wstring& program) {
+    if (!m_trayIcon) {
+        return;
+    }
+
+    std::wstring text;
+    if (reason == L"crash") {
+        text = Functions::ReplaceAll(
+            Functions::ReplaceAll(
+                Functions::LoadStrFromRsrc(IDS_CRASH_GUARD_MOD_DISABLED),
+                L"{mod}", modName),
+            L"{program}", program);
+    } else if (reason == L"explorer") {
+        text = Functions::LoadStrFromRsrc(IDS_CRASH_GUARD_EXPLORER_DISABLED);
+    } else if (reason == L"user") {
+        text = Functions::LoadStrFromRsrc(IDS_CRASH_GUARD_ALL_DISABLED);
+    } else {
+        return;
+    }
+
+    m_trayIcon->ShowNotificationMessage(text.c_str());
 }
 
 void CMainWindow::HandleExplorerCrash(int explorerCrashCount) {
