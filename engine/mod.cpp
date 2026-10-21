@@ -2608,6 +2608,25 @@ bool Mod::ShouldLoadInRunningProcess(PCWSTR modName) {
 
     std::wstring processPath = wil::GetModuleFileName<std::wstring>();
 
+    // Shihab Alaq: tool mods name Windhawk's own exe, windhawk.exe, in their
+    // patterns (and start "<current exe> -tool-mod <id>"). Here that exe is
+    // ShihabAlaqEngine.exe, so its patterns also match this process as if it
+    // were named windhawk.exe, and such mods run unchanged.
+    std::wstring processPathAsWindhawk;
+    if (std::filesystem::path path(processPath);
+        _wcsicmp(path.filename().c_str(), L"ShihabAlaqEngine.exe") == 0) {
+        processPathAsWindhawk = path.replace_filename(L"windhawk.exe").native();
+    }
+
+    auto matchesPattern = [&](const std::wstring& pattern,
+                              bool explicitOnly = false) {
+        return Functions::DoesPathMatchPattern(processPath, pattern,
+                                               explicitOnly) ||
+               (!processPathAsWindhawk.empty() &&
+                Functions::DoesPathMatchPattern(processPathAsWindhawk, pattern,
+                                                explicitOnly));
+    };
+
     bool includeExcludeCustomOnly =
         settings->GetInt(L"IncludeExcludeCustomOnly").value_or(0);
 
@@ -2620,12 +2639,10 @@ bool Mod::ShouldLoadInRunningProcess(PCWSTR modName) {
 
     bool include =
         (!includeExcludeCustomOnly &&
-         Functions::DoesPathMatchPattern(
-             processPath, settings->GetString(L"Include").value_or(L""),
-             matchPatternExplicitOnly)) ||
-        Functions::DoesPathMatchPattern(
-            processPath, settings->GetString(L"IncludeCustom").value_or(L""),
-            matchPatternExplicitOnly);
+         matchesPattern(settings->GetString(L"Include").value_or(L""),
+                        matchPatternExplicitOnly)) ||
+        matchesPattern(settings->GetString(L"IncludeCustom").value_or(L""),
+                       matchPatternExplicitOnly);
 
     if (!include) {
         return false;
@@ -2633,10 +2650,8 @@ bool Mod::ShouldLoadInRunningProcess(PCWSTR modName) {
 
     bool exclude =
         (!includeExcludeCustomOnly &&
-         Functions::DoesPathMatchPattern(
-             processPath, settings->GetString(L"Exclude").value_or(L""))) ||
-        Functions::DoesPathMatchPattern(
-            processPath, settings->GetString(L"ExcludeCustom").value_or(L""));
+         matchesPattern(settings->GetString(L"Exclude").value_or(L""))) ||
+        matchesPattern(settings->GetString(L"ExcludeCustom").value_or(L""));
 
     return !exclude;
 }
