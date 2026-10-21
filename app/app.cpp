@@ -74,6 +74,14 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 
     SetCurrentProcessExplicitAppUserModelID(L"ShihabApp.ShihabAlaq.Engine");
 
+    // Shihab Alaq: a tool mod process. When its mod is loaded, the mod takes
+    // over before this function runs; reaching it means the mod isn't loaded
+    // (the engine stopped, or the mod was turned off), and running the default
+    // action would start the engine again.
+    if (DoesParamExist(L"-tool-mod")) {
+        return 0;
+    }
+
     Action action = Action::kDefault;
     if (DoesParamExist(L"-service")) {
         action = Action::kService;

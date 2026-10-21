@@ -2611,11 +2611,37 @@ bool Mod::ShouldLoadInRunningProcess(PCWSTR modName) {
     // Shihab Alaq: tool mods name Windhawk's own exe, windhawk.exe, in their
     // patterns (and start "<current exe> -tool-mod <id>"). Here that exe is
     // ShihabAlaqEngine.exe, so its patterns also match this process as if it
-    // were named windhawk.exe, and such mods run unchanged.
+    // were named windhawk.exe, and such mods run unchanged. Only the tray part
+    // (no switch, or -tray-only) and tool mod processes (-tool-mod) count:
+    // a command such as -exit is short-lived, and a tool mod started from it
+    // would outlive it and start the engine again.
     std::wstring processPathAsWindhawk;
     if (std::filesystem::path path(processPath);
         _wcsicmp(path.filename().c_str(), L"ShihabAlaqEngine.exe") == 0) {
-        processPathAsWindhawk = path.replace_filename(L"windhawk.exe").native();
+        // The arguments after the exe's path, which may be quoted.
+        std::wstring_view args = GetCommandLineW();
+        if (args.starts_with(L'"')) {
+            size_t end = args.find(L'"', 1);
+            args.remove_prefix(end == args.npos ? args.size() : end + 1);
+        } else {
+            size_t end = args.find_first_of(L" \t");
+            args.remove_prefix(end == args.npos ? args.size() : end);
+        }
+        size_t start = args.find_first_not_of(L" \t");
+        args.remove_prefix(start == args.npos ? args.size() : start);
+
+        auto firstArgIs = [args](std::wstring_view name) {
+            return args.size() >= name.size() &&
+                   _wcsnicmp(args.data(), name.data(), name.size()) == 0 &&
+                   (args.size() == name.size() || args[name.size()] == L' ' ||
+                    args[name.size()] == L'\t');
+        };
+
+        if (args.empty() || firstArgIs(L"-tray-only") ||
+            firstArgIs(L"-tool-mod")) {
+            processPathAsWindhawk =
+                path.replace_filename(L"windhawk.exe").native();
+        }
     }
 
     auto matchesPattern = [&](const std::wstring& pattern,
