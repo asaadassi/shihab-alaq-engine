@@ -28,6 +28,7 @@ enum class Action {
     kRestart,
     kRestartBg,
     kEnableSafeMode,
+    kDisableSafeMode,
 };
 
 void Initialize();
@@ -104,6 +105,10 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
         // Shihab Alaq: its Engine page turns safe mode on with this, which
         // stops everything and writes the flag, without opening a UI.
         action = Action::kEnableSafeMode;
+    } else if (DoesParamExist(L"-x-disable-safe-mode")) {
+        // Shihab Alaq: its Engine page's restart, which also leaves safe mode
+        // (Windhawk leaves it from its UI, which Shihab Alaq replaces).
+        action = Action::kDisableSafeMode;
     }
 
     HRESULT hr = S_OK;
@@ -238,6 +243,15 @@ void Run(Action action) {
             VERBOSE("Enabling safe mode");
             ExitApp(/*wait=*/true, /*timeout=*/30000);
             EnableSafeMode();
+            break;
+
+        case Action::kDisableSafeMode:
+            VERBOSE("Disabling safe mode and restarting service/daemon");
+            // Cleared first: the service reads it when it starts.
+            StorageManager::GetInstance()
+                .GetAppConfig(L"Settings", true)
+                ->Remove(L"SafeMode");
+            RestartAppBg(/*timeout=*/30000);
             break;
 
         default:
