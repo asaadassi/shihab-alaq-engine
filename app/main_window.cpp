@@ -9,6 +9,12 @@
 #include "ui_control.h"
 #include "version.h"
 
+#include <dwmapi.h>
+
+#include <deque>
+
+#pragma comment(lib, "dwmapi.lib")
+
 namespace {
 
 constexpr auto kHandleNewProcessInterval = 1000;       // 1sec
@@ -16,6 +22,219 @@ constexpr auto kUpdateInitialDelay = 1000 * 10;        // 10sec
 constexpr auto kUpdateInterval = 1000 * 60 * 60 * 24;  // 24h
 constexpr auto kUpdateRetryTime = 1000 * 60 * 60;      // 1h
 constexpr auto kModTasksDlgInitialDelay = 1000;        // 1sec
+
+// Shihab Alaq: the tray icon's menu is drawn in the Shihab look instead of the
+// grey system menu: the colours are the dark tokens of Shihab.Common
+// (ShihabTheme.xaml: Panel, ControlHover, Stroke, Text, Muted, Accent) and the
+// text is Almarai when it is installed, Segoe UI otherwise.
+namespace ShihabMenu {
+constexpr COLORREF kPanel = RGB(0x1C, 0x17, 0x20);
+constexpr COLORREF kHover = RGB(0x37, 0x2F, 0x3D);
+constexpr COLORREF kStroke = RGB(0x35, 0x2D, 0x3B);
+constexpr COLORREF kText = RGB(0xF5, 0xF1, 0xF7);
+constexpr COLORREF kMuted = RGB(0xA7, 0x9C, 0xAD);
+
+// "label" or "label\tshortcut". Alive while the menu is open: each item's data
+// points at one of these, and a deque never moves its elements when it grows.
+std::deque<std::wstring> g_items;
+HBRUSH g_panelBrush = nullptr;
+HFONT g_textFont = nullptr;
+UINT g_fontDpi = 0;
+
+int CALLBACK OnFontFound(const LOGFONTW*, const TEXTMETRICW*, DWORD, LPARAM found) {
+    *reinterpret_cast<bool*>(found) = true;
+    return 0;
+}
+
+bool IsFontInstalled(const wchar_t* face) {
+    HDC dc = GetDC(nullptr);
+    LOGFONTW lf{};
+    lf.lfCharSet = DEFAULT_CHARSET;
+    wcscpy_s(lf.lfFaceName, face);
+    bool found = false;
+    EnumFontFamiliesExW(dc, &lf, OnFontFound, reinterpret_cast<LPARAM>(&found), 0);
+    ReleaseDC(nullptr, dc);
+    return found;
+}
+
+void EnsureResources(UINT dpi) {
+    if (!g_panelBrush) {
+        g_panelBrush = CreateSolidBrush(kPanel);
+    }
+    if (g_fontDpi == dpi && g_textFont) {
+        return;
+    }
+    if (g_textFont) {
+        DeleteObject(g_textFont);
+    }
+    static const bool almarai = IsFontInstalled(L"Almarai");
+    g_textFont = CreateFontW(-MulDiv(13, dpi, 96), 0, 0, 0, FW_NORMAL, FALSE, FALSE,
+                             FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+                             CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH,
+                             almarai ? L"Almarai" : L"Segoe UI");
+    g_fontDpi = dpi;
+}
+
+void Append(HMENU menu, UINT flags, UINT_PTR id = 0, PCWSTR text = nullptr) {
+    if (flags & MF_SEPARATOR) {
+        AppendMenuW(menu, MF_SEPARATOR | MF_OWNERDRAW, 0, nullptr);
+        return;
+    }
+    g_items.push_back(text ? text : L"");
+    AppendMenuW(menu, flags | MF_OWNERDRAW, id,
+                reinterpret_cast<PCWSTR>(&g_items.back()));
+}
+
+// The panel colour behind the items.
+void Finish(HMENU menu) {
+    MENUINFO info{sizeof(info)};
+    info.fMask = MIM_BACKGROUND | MIM_APPLYTOSUBMENUS;
+    info.hbrBack = g_panelBrush;
+    SetMenuInfo(menu, &info);
+}
+
+bool Measure(HWND hwnd, MEASUREITEMSTRUCT* mis) {
+    if (mis->CtlType != ODT_MENU) {
+        return false;
+    }
+    const UINT dpi = g_fontDpi ? g_fontDpi : 96;
+    const auto* text = reinterpret_cast<const std::wstring*>(mis->itemData);
+    if (!text) {  // separator
+        mis->itemWidth = 0;
+        mis->itemHeight = MulDiv(9, dpi, 96);
+        return true;
+    }
+    HDC dc = GetDC(hwnd);
+    HGDIOBJ old = SelectObject(dc, g_textFont);
+    // Measured as drawn: the "&" of the keyboard letter takes no room
+    RECT size{};
+    DrawTextW(dc, text->c_str(), static_cast<int>(text->size()), &size,
+              DT_CALCRECT | DT_SINGLELINE | DT_EXPANDTABS | DT_HIDEPREFIX);
+    SelectObject(dc, old);
+    ReleaseDC(hwnd, dc);
+    // Room for the text, the gap before a shortcut, and the padding
+    mis->itemWidth = size.right + MulDiv(34 + 40, dpi, 96);
+    mis->itemHeight = MulDiv(32, dpi, 96);
+    return true;
+}
+
+bool Draw(DRAWITEMSTRUCT* dis, bool rtl) {
+    if (dis->CtlType != ODT_MENU) {
+        return false;
+    }
+    HDC dc = dis->hDC;
+    const UINT dpi = g_fontDpi ? g_fontDpi : 96;
+    auto px = [dpi](int v) { return MulDiv(v, dpi, 96); };
+
+    // A right-to-left menu gets a mirrored DC, and right-to-left text drawn on
+    // it loses its order. Draw unmirrored, through device coordinates (the
+    // first paint goes to a memory DC with no window to measure), and place the
+    // text from the right here instead.
+    RECT rc = dis->rcItem;
+    const DWORD layout = GetLayout(dc);
+    if (layout & LAYOUT_RTL) {
+        POINT corners[2] = {{rc.left, rc.top}, {rc.right, rc.bottom}};
+        LPtoDP(dc, corners, 2);
+        SetLayout(dc, 0);
+        DPtoLP(dc, corners, 2);
+        rc = {std::min(corners[0].x, corners[1].x), rc.top,
+              std::max(corners[0].x, corners[1].x), rc.bottom};
+    }
+    FillRect(dc, &rc, g_panelBrush);
+
+    const auto* text = reinterpret_cast<const std::wstring*>(dis->itemData);
+    if (!text) {  // separator: a hairline
+        const int y = (rc.top + rc.bottom) / 2;
+        RECT line{rc.left + px(10), y, rc.right - px(10), y + std::max(1, px(1))};
+        HBRUSH stroke = CreateSolidBrush(kStroke);
+        FillRect(dc, &line, stroke);
+        DeleteObject(stroke);
+    } else {
+        const bool disabled = (dis->itemState & (ODS_GRAYED | ODS_DISABLED)) != 0;
+        if ((dis->itemState & ODS_SELECTED) && !disabled) {
+            HGDIOBJ oldBrush = SelectObject(dc, GetStockObject(DC_BRUSH));
+            HGDIOBJ oldPen = SelectObject(dc, GetStockObject(NULL_PEN));
+            SetDCBrushColor(dc, kHover);
+            RoundRect(dc, rc.left + px(4), rc.top + px(2), rc.right - px(4),
+                      rc.bottom - px(1), px(10), px(10));
+            SelectObject(dc, oldPen);
+            SelectObject(dc, oldBrush);
+        }
+
+        std::wstring label = *text;
+        std::wstring shortcut;
+        if (size_t tab = label.find(L'\t'); tab != std::wstring::npos) {
+            shortcut = label.substr(tab + 1);
+            label.resize(tab);
+        }
+
+        SetBkMode(dc, TRANSPARENT);
+        HGDIOBJ oldFont = SelectObject(dc, g_textFont);
+        RECT textRect{rc.left + px(18), rc.top, rc.right - px(18), rc.bottom};
+        SetTextColor(dc, disabled ? kMuted : kText);
+        // DT_HIDEPREFIX: the "&" before the keyboard letter isn't shown
+        DrawTextW(dc, label.c_str(), static_cast<int>(label.size()), &textRect,
+                  DT_SINGLELINE | DT_VCENTER | DT_HIDEPREFIX |
+                      (rtl ? DT_RIGHT | DT_RTLREADING : DT_LEFT));
+        if (!shortcut.empty()) {
+            // A shortcut reads left to right whatever the menu's direction
+            SetTextColor(dc, kMuted);
+            DrawTextW(dc, shortcut.c_str(), static_cast<int>(shortcut.size()),
+                      &textRect,
+                      DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX |
+                          (rtl ? DT_LEFT : DT_RIGHT));
+        }
+        SelectObject(dc, oldFont);
+    }
+
+    if (layout & LAYOUT_RTL) {
+        SetLayout(dc, layout);
+    }
+    // Stops the system from painting over the item
+    ExcludeClipRect(dc, dis->rcItem.left, dis->rcItem.top, dis->rcItem.right,
+                    dis->rcItem.bottom);
+    return true;
+}
+
+// Owner-drawn items lose the "&" keyboard letters of plain menus: the item
+// whose letter was typed is found here (WM_MENUCHAR) and run.
+LRESULT MenuChar(wchar_t typed, HMENU menu) {
+    const int count = GetMenuItemCount(menu);
+    for (int i = 0; i < count; i++) {
+        MENUITEMINFOW info{sizeof(info)};
+        info.fMask = MIIM_DATA;
+        if (!GetMenuItemInfoW(menu, i, TRUE, &info) || !info.dwItemData) {
+            continue;
+        }
+        const auto* text = reinterpret_cast<const std::wstring*>(info.dwItemData);
+        for (size_t p = text->find(L'&'); p != std::wstring::npos && p + 1 < text->size();
+             p = text->find(L'&', p + 2)) {
+            if ((*text)[p + 1] == L'&') {
+                continue;  // "&&" is a plain "&"
+            }
+            if (CharUpperW(reinterpret_cast<LPWSTR>(static_cast<ULONG_PTR>((*text)[p + 1]))) ==
+                CharUpperW(reinterpret_cast<LPWSTR>(static_cast<ULONG_PTR>(typed)))) {
+                return MAKELRESULT(i, MNC_EXECUTE);
+            }
+            break;
+        }
+    }
+    return MAKELRESULT(0, MNC_IGNORE);
+}
+
+// The menu window itself: a Stroke-coloured border and round corners (Windows 11).
+void StyleMenuWindow(HWND menuWindow) {
+    if (!menuWindow) {
+        return;
+    }
+    const COLORREF border = kStroke;
+    DwmSetWindowAttribute(menuWindow, 34 /* DWMWA_BORDER_COLOR */, &border,
+                          sizeof(border));
+    const int corner = 2;  // DWMWCP_ROUND
+    DwmSetWindowAttribute(menuWindow, 33 /* DWMWA_WINDOW_CORNER_PREFERENCE */,
+                          &corner, sizeof(corner));
+}
+}  // namespace ShihabMenu
 
 ULONGLONG GetTaskbarProcessCreationTime() {
     HWND currentTaskbarWindow = FindWindow(L"Shell_TrayWnd", nullptr);
@@ -383,6 +602,41 @@ LRESULT CMainWindow::OnPortableAppCommand(UINT uMsg,
     return 0;
 }
 
+LRESULT CMainWindow::OnMeasureItem(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if (!ShihabMenu::Measure(m_hWnd,
+                             reinterpret_cast<MEASUREITEMSTRUCT*>(lParam))) {
+        SetMsgHandled(FALSE);
+        return 0;
+    }
+    return TRUE;
+}
+
+LRESULT CMainWindow::OnDrawItem(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    const bool rtl = (GetExStyle() & WS_EX_LAYOUTRTL) != 0;
+    if (!ShihabMenu::Draw(reinterpret_cast<DRAWITEMSTRUCT*>(lParam), rtl)) {
+        SetMsgHandled(FALSE);
+        return 0;
+    }
+    return TRUE;
+}
+
+LRESULT CMainWindow::OnMenuChar(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    if (HIWORD(wParam) != MF_POPUP) {
+        SetMsgHandled(FALSE);
+        return 0;
+    }
+    return ShihabMenu::MenuChar(LOWORD(wParam), reinterpret_cast<HMENU>(lParam));
+}
+
+LRESULT CMainWindow::OnEnterIdle(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    // lParam is the window of the menu being shown
+    if (wParam == MSGF_MENU) {
+        ShihabMenu::StyleMenuWindow(reinterpret_cast<HWND>(lParam));
+    }
+    SetMsgHandled(FALSE);
+    return 0;
+}
+
 LRESULT CMainWindow::OnTrayIcon(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     enum class Action {
         kNone,
@@ -400,24 +654,34 @@ LRESULT CMainWindow::OnTrayIcon(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             return Action::kNone;
         }
 
-        menu.AppendMenu(MF_STRING, static_cast<UINT_PTR>(Action::kOpenUI),
-                        Functions::LoadStrFromRsrc(IDS_TRAY_OPEN));
-        menu.AppendMenu(MF_SEPARATOR);
-        menu.AppendMenu(MF_STRING,
-                        static_cast<UINT_PTR>(Action::kModTaskManager),
-                        Functions::LoadStrFromRsrc(IDS_TRAY_LOADED_MODS));
+        // Shihab Alaq: the items are drawn by ShihabMenu (OnMeasureItem,
+        // OnDrawItem), in the Shihab look.
+        ShihabMenu::g_items.clear();
+        // The screen's DPI: GetDpiForWindow isn't there on Windows 7
+        {
+            CClientDC screen(nullptr);
+            ShihabMenu::EnsureResources(screen.GetDeviceCaps(LOGPIXELSY));
+        }
+        ShihabMenu::Append(menu, MF_STRING,
+                           static_cast<UINT_PTR>(Action::kOpenUI),
+                           Functions::LoadStrFromRsrc(IDS_TRAY_OPEN));
+        ShihabMenu::Append(menu, MF_SEPARATOR);
+        ShihabMenu::Append(menu, MF_STRING,
+                           static_cast<UINT_PTR>(Action::kModTaskManager),
+                           Functions::LoadStrFromRsrc(IDS_TRAY_LOADED_MODS));
         // Shihab Alaq: one click turns every mod off.
-        menu.AppendMenu(MF_STRING,
-                        static_cast<UINT_PTR>(Action::kDisableAllMods),
-                        Functions::LoadStrFromRsrc(IDS_TRAY_DISABLE_ALL_MODS));
-        menu.AppendMenu(
-            MF_STRING, static_cast<UINT_PTR>(Action::kToolkit),
+        ShihabMenu::Append(menu, MF_STRING,
+                           static_cast<UINT_PTR>(Action::kDisableAllMods),
+                           Functions::LoadStrFromRsrc(IDS_TRAY_DISABLE_ALL_MODS));
+        ShihabMenu::Append(
+            menu, MF_STRING, static_cast<UINT_PTR>(Action::kToolkit),
             (std::wstring(Functions::LoadStrFromRsrc(IDS_TRAY_TOOLKIT)) +
              (m_disableToolkitHotkey ? L"" : L"\tCtrl+Win+W"))
                 .c_str());
-        menu.AppendMenu(MF_SEPARATOR);
-        menu.AppendMenu(MF_STRING, static_cast<UINT_PTR>(Action::kExit),
-                        Functions::LoadStrFromRsrc(IDS_TRAY_EXIT));
+        ShihabMenu::Append(menu, MF_SEPARATOR);
+        ShihabMenu::Append(menu, MF_STRING, static_cast<UINT_PTR>(Action::kExit),
+                           Functions::LoadStrFromRsrc(IDS_TRAY_EXIT));
+        ShihabMenu::Finish(menu);
 
         CPoint point;
         GetCursorPos(&point);

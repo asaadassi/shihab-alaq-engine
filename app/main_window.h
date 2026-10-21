@@ -52,6 +52,10 @@ class CMainWindow : public CWindowImpl<CMainWindow, CWindow, CNullTraits>,
         MSG_WM_POWERBROADCAST(OnPowerBroadcast)
         MESSAGE_HANDLER_EX(UWM_PORTABLE_APP_COMMAND, OnPortableAppCommand)
         MESSAGE_HANDLER_EX(UWM_TRAYICON, OnTrayIcon)
+        MESSAGE_HANDLER_EX(WM_MEASUREITEM, OnMeasureItem)
+        MESSAGE_HANDLER_EX(WM_DRAWITEM, OnDrawItem)
+        MESSAGE_HANDLER_EX(WM_ENTERIDLE, OnEnterIdle)
+        MESSAGE_HANDLER_EX(WM_MENUCHAR, OnMenuChar)
         MESSAGE_HANDLER_EX(UWM_UPDATE_CHECKED, OnUpdateChecked)
         MESSAGE_HANDLER_EX(m_taskbarCreatedMsg, OnTaskbarCreated)
     END_MSG_MAP()
@@ -63,6 +67,10 @@ class CMainWindow : public CWindowImpl<CMainWindow, CWindow, CNullTraits>,
     BOOL OnPowerBroadcast(DWORD dwPowerEvent, DWORD_PTR dwData);
     LRESULT OnPortableAppCommand(UINT uMsg, WPARAM wParam, LPARAM lParam);
     LRESULT OnTrayIcon(UINT uMsg, WPARAM wParam, LPARAM lParam);
+    LRESULT OnMeasureItem(UINT uMsg, WPARAM wParam, LPARAM lParam);
+    LRESULT OnDrawItem(UINT uMsg, WPARAM wParam, LPARAM lParam);
+    LRESULT OnEnterIdle(UINT uMsg, WPARAM wParam, LPARAM lParam);
+    LRESULT OnMenuChar(UINT uMsg, WPARAM wParam, LPARAM lParam);
     LRESULT OnUpdateChecked(UINT uMsg, WPARAM wParam, LPARAM lParam);
     LRESULT OnTaskbarCreated(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
