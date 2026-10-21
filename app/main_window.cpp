@@ -292,7 +292,7 @@ int CMainWindow::OnCreate(LPCREATESTRUCT lpCreateStruct) {
             InitForNonPortableVersion();
         }
     } catch (const std::exception& e) {
-        ::MessageBoxA(nullptr, e.what(), "Could not initialize the Shihab Alaq engine",
+        ::MessageBoxA(nullptr, e.what(), "Could not initialize AlaqEngine",
                       MB_ICONERROR);
         return -1;
     }
@@ -313,7 +313,7 @@ int CMainWindow::OnCreate(LPCREATESTRUCT lpCreateStruct) {
     }
 
     if (!LoadSettings()) {
-        ::MessageBox(nullptr, L"Could not load settings", L"Shihab Alaq error",
+        ::MessageBox(nullptr, L"Could not load settings", L"Alaq error",
                      MB_ICONERROR);
     }
 
@@ -1086,7 +1086,7 @@ void CMainWindow::StopService(HWND hWnd) {
                                 std::string msg =
                                     "Exiting failed with the error below. If "
                                     "nothing else works, you can choose to "
-                                    "send an exit signal to the Shihab Alaq "
+                                    "send an exit signal to the AlaqEngine "
                                     "service. Send exit signal?\n\nError:\n";
 
                                 msg += e.what();
@@ -1197,7 +1197,7 @@ void CMainWindow::OpenUpdatePage() {
     if ((int)(UINT_PTR)ShellExecute(m_hWnd, nullptr, url, nullptr, nullptr,
                                     SW_SHOWNORMAL) <= 32) {
         MessageBox(
-            L"Could not open the update page, please update Shihab Alaq manually",
+            L"Could not open the update page, please update Alaq manually",
             L"Error", MB_ICONERROR);
     }
 }

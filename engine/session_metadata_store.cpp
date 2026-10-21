@@ -407,7 +407,7 @@ void SessionMetadataStore::EnsureKeys() noexcept try {
 
         // Explain the key to anyone browsing the registry.
         constexpr WCHAR kContainerNote[] =
-            L"Shihab Alaq session data. This key is volatile (temporary) and is "
+            L"Alaq session data. This key is volatile (temporary) and is "
             L"removed once the hive holding it is unloaded, at reboot or at "
             L"logoff.";
         RegSetValueEx(m_container.get(), nullptr, 0, REG_SZ,

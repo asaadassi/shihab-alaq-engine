@@ -114,9 +114,9 @@ void CTaskManagerDlg::LoadLanguageStrings() {
             break;
     }
 
-    WCHAR title[1024] = L"Shihab Alaq";
+    WCHAR title[1024] = L"Alaq";
     if (titleId) {
-        _snwprintf_s(title, _TRUNCATE, L"%s - Shihab Alaq",
+        _snwprintf_s(title, _TRUNCATE, L"%s - Alaq",
                      Functions::LoadStrFromRsrc(titleId));
     }
     SetWindowText(title);

@@ -114,7 +114,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
         switch (action) {
             case Action::kDefault:
             case Action::kRunUI:
-                ::MessageBoxA(nullptr, e.what(), "Shihab Alaq error",
+                ::MessageBoxA(nullptr, e.what(), "Alaq error",
                               MB_ICONERROR);
                 break;
 
@@ -275,7 +275,7 @@ void RunDaemon() {
         if (!Functions::IsRunAsAdmin()) {
             // Elevate for the service start only, and wait for it, so the UI is
             // opened from this process, which is still unelevated.
-            if (RunElevatedStep(L"start the Shihab Alaq engine service",
+            if (RunElevatedStep(L"start the AlaqEngine service",
                                 L"-service-start") &&
                 !trayOnly) {
                 UIControl::RunUIOrBringToFront(nullptr);
@@ -718,7 +718,7 @@ bool RunElevatedStep(PCWSTR what, PCWSTR parameters) {
             message += std::format(L"\n\n{}", description);
         }
 
-        ::MessageBox(nullptr, message.c_str(), L"Shihab Alaq error", MB_ICONERROR);
+        ::MessageBox(nullptr, message.c_str(), L"Alaq error", MB_ICONERROR);
         return false;
     }
 

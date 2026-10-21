@@ -1482,7 +1482,7 @@ LoadedMod::LoadedMod(PCWSTR modName,
 #else
 #error "Unsupported architecture"
 #endif
-    VERBOSE(L"Shihab Alaq engine v" VER_FILE_VERSION_WSTR L" " WINDHAWK_ARCH);
+    VERBOSE(L"AlaqEngine v" VER_FILE_VERSION_WSTR L" " WINDHAWK_ARCH);
 #undef WINDHAWK_ARCH
     VERBOSE(L"Mod id: %s", m_modName.c_str());
     VERBOSE(L"Mod version: %s", m_modVersion.c_str());
