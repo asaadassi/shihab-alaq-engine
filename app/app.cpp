@@ -27,6 +27,7 @@ enum class Action {
     kExit,
     kRestart,
     kRestartBg,
+    kEnableSafeMode,
 };
 
 void Initialize();
@@ -99,6 +100,10 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
         action = Action::kRestart;
     } else if (DoesParamExist(L"-restart-bg")) {
         action = Action::kRestartBg;
+    } else if (DoesParamExist(L"-x-enable-safe-mode")) {
+        // Shihab Alaq: its Engine page turns safe mode on with this, which
+        // stops everything and writes the flag, without opening a UI.
+        action = Action::kEnableSafeMode;
     }
 
     HRESULT hr = S_OK;
@@ -229,6 +234,12 @@ void Run(Action action) {
             break;
         }
 
+        case Action::kEnableSafeMode:
+            VERBOSE("Enabling safe mode");
+            ExitApp(/*wait=*/true, /*timeout=*/30000);
+            EnableSafeMode();
+            break;
+
         default:
             VERBOSE("Running the engine daemon");
             RunDaemon();
@@ -324,6 +335,9 @@ void RunDaemon() {
 }
 
 void CheckForUpdates() {
+    // Shihab Alaq updates the engine with its own installer.
+    return;
+
     bool portable = StorageManager::GetInstance().IsPortable();
 
     UpdateChecker m_updateChecker(portable ? UpdateChecker::kFlagPortable : 0,
@@ -468,6 +482,12 @@ void WaitForRunningProcessesToTerminate(DWORD timeout, bool windhawkBgOnly) {
                 if (_wcsicmp(pe.szExeFile, L"uninstall.exe") == 0) {
                     // Skipping uninstaller, which may be running but is not
                     // part of the app.
+                    continue;
+                }
+
+                if (_wcsicmp(pe.szExeFile, L"ShihabAlaq.exe") == 0) {
+                    // Shihab Alaq: the app next to this exe is a separate
+                    // program, often the one which asked for the exit.
                     continue;
                 }
             }

@@ -613,10 +613,11 @@ void CMainWindow::LoadSettings() {
             StorageManager::GetInstance().GetAppConfig(L"Settings", false);
 
         languageId = LANGIDFROMLCID(LocaleNameToLCID(
-            settings->GetString(L"Language").value_or(L"en").c_str(), 0));
+            settings->GetString(L"Language").value_or(L"ar").c_str(), 0));
         hideTrayIcon = settings->GetInt(L"HideTrayIcon").value_or(0);
-        disableUpdateCheck =
-            settings->GetInt(L"DisableUpdateCheck").value_or(0);
+        // Shihab Alaq updates the engine with its own installer, so the
+        // engine never checks for updates itself.
+        disableUpdateCheck = true;
 
         if (m_portable) {
             lastUpdateCheck = std::wcstoull(

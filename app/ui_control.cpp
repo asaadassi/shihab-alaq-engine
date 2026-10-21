@@ -139,7 +139,30 @@ BOOL IsArm64NativeMachine() {
 
 namespace UIControl {
 
+// Shihab Alaq: the UI is Shihab Alaq (ShihabAlaq.exe next to this exe), a
+// separate program which asks for administrator rights in its manifest, so it's
+// started with ShellExecuteEx (CreateProcess can't show the elevation prompt).
+// It keeps a single instance itself: a second launch brings the open window to
+// the front. Windhawk's VSCodium UI (RunVSCodeUI) is not used.
 void RunUI() {
+    auto modulePath = wil::GetModuleFileName<std::wstring>();
+    auto uiExePath =
+        std::filesystem::path(modulePath).parent_path() / L"ShihabAlaq.exe";
+    auto uiDir = uiExePath.parent_path();
+
+    SHELLEXECUTEINFO sei{sizeof(sei)};
+    sei.fMask = SEE_MASK_NOASYNC | SEE_MASK_FLAG_NO_UI;
+    sei.lpVerb = L"open";
+    sei.lpFile = uiExePath.c_str();
+    sei.lpDirectory = uiDir.c_str();
+    sei.nShow = SW_SHOWNORMAL;
+    if (!ShellExecuteEx(&sei)) {
+        // The user declining the elevation prompt isn't an error.
+        THROW_LAST_ERROR_IF(GetLastError() != ERROR_CANCELLED);
+    }
+}
+
+void RunVSCodeUI() {
     auto uiDataPath = StorageManager::GetInstance().GetUIDataPath();
     PrepareUISettings(uiDataPath);
 
@@ -246,6 +269,12 @@ std::vector<HWND> GetOpenUIWindows() {
 
     auto uiPath = StorageManager::GetInstance().GetUIPath();
 
+    // Shihab Alaq: no VSCodium UI is installed, so there are no windows of it.
+    // Shihab Alaq's own window is left alone, it's a separate program.
+    if (uiPath.empty()) {
+        return {};
+    }
+
     EnumWindowsParam enumWindowsParam = {uiPath / L"VSCodium.exe",
                                          uiPath / L"Code.exe"};
 
@@ -319,6 +348,11 @@ bool BringUIToFront() {
 }
 
 void RunUIOrBringToFront(HWND hWnd, bool mustRunAsAdmin) {
+    // Shihab Alaq: ShihabAlaq.exe asks for elevation itself, and a second
+    // launch brings its open window to the front.
+    UIControl::RunUI();
+    return;
+
     // If running, just bring to front.
     if (UIControl::BringUIToFront()) {
         return;
