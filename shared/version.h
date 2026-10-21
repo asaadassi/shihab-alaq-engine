@@ -6,6 +6,11 @@
 #define VERSION_REVISION            3
 #define VERSION_BUILD               0
 
+// Shihab Alaq keeps the upstream Windhawk version numbers (mods compile against
+// them as WH_WINDHAWK_VERSION) and marks its own builds with "-shihab.N". The
+// tag is only in the string forms; the numeric ones stay as they are.
+#define VERSION_PRERELEASE          "-shihab.1"
+
 // etc.
 #define STRINGIZE2(s)               #s
 #define STRINGIZE(s)                STRINGIZE2(s)
@@ -32,7 +37,7 @@
                                     t(STRINGIZE(VERSION_BUILD))
 #endif // VERSION_BUILD == 0
 
-#define VER_FILE_VERSION_STR        VER_FILE_VERSION_TSTR(N)
-#define VER_FILE_VERSION_WSTR       VER_FILE_VERSION_TSTR(W)
+#define VER_FILE_VERSION_STR        VER_FILE_VERSION_TSTR(N) VERSION_PRERELEASE
+#define VER_FILE_VERSION_WSTR       VER_FILE_VERSION_TSTR(W) W(VERSION_PRERELEASE)
 
 #define VER_FILE_VERSION_LONG       LONG_ID(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD)

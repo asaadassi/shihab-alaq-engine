@@ -1,0 +1,62 @@
+# Builds the engine on Windows for every push and pull request. On main, a version in shared/version.h that has
+# no release yet (e.g. 1.7.3-shihab.1) is published as release "v<version>", tagged at that commit, with the
+# package Shihab Alaq's installer uses. Raising the version is how a new engine release is made.
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: microsoft/setup-msbuild@v2
+
+      - uses: nuget/setup-nuget@v2
+
+      - name: Restore NuGet packages (WTL)
+        run: nuget restore ShihabAlaqEngine.sln
+
+      # The app is 32-bit, as in Windhawk 1.7 (its x86 engine injects into every process); its x64 build is the
+      # helper the engine needs on ARM64
+      - name: Build the app (x86, and x64 for the helper) and the engine (x86, x64, ARM64)
+        shell: cmd
+        run: |
+          msbuild ShihabAlaqEngine.sln /m /t:app /p:Configuration=Release /p:Platform=Win32 || exit /b 1
+          msbuild ShihabAlaqEngine.sln /m /t:app /p:Configuration=Release /p:Platform=x64 || exit /b 1
+          msbuild ShihabAlaqEngine.sln /m /t:engine /p:Configuration=Release /p:Platform=Win32 || exit /b 1
+          msbuild ShihabAlaqEngine.sln /m /t:engine /p:Configuration=Release /p:Platform=x64 || exit /b 1
+          msbuild ShihabAlaqEngine.sln /m /t:engine /p:Configuration=Release /p:Platform=ARM64 || exit /b 1
+
+      - name: Package
+        shell: pwsh
+        run: ./scripts/package.ps1 -Out dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ShihabAlaqEngine
+          path: dist/*
+
+      - name: Publish the release (new version on main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $zip = Get-ChildItem dist/ShihabAlaqEngine-*.zip | Select-Object -First 1
+          $version = $zip.BaseName.Substring("ShihabAlaqEngine-".Length)
+          $tag = "v$version"
+          gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) { Write-Host "$tag is already released"; exit 0 }
+          $notes = "AlaqEngine build for Alaq. Source: this tag. Licence: GPL-3.0. Based on Windhawk by Ramen Software."
+          $flags = @("--target", $env:GITHUB_SHA, "--title", "AlaqEngine $version", "--notes", $notes)
+          if ($version -match '-') { $flags += "--prerelease" }
+          gh release create $tag (Get-ChildItem dist/*).FullName --repo $env:GITHUB_REPOSITORY @flags

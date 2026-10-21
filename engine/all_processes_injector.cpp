@@ -13,6 +13,8 @@
 #define STATUS_NO_MORE_ENTRIES ((NTSTATUS)0x8000001AL)
 #endif
 
+extern HINSTANCE g_hDllInst;
+
 namespace {
 
 struct __declspec(align(16)) MY_CONTEXT_AMD64 {
@@ -98,8 +100,11 @@ USHORT GetNativeMachine() {
 // look for the mention of RtlUserThreadStart in
 // https://m417z.com/Implementing-Global-Injection-and-Hooking-in-Windows/.
 DWORD64 GetRtlUserThreadStart_x64OnArm64() {
+    // Shihab Alaq: next to this DLL (Engine\<version>\32), which comes with its
+    // own files, rather than next to the exe. Any x64 exe does: it's only
+    // created suspended, and terminated.
     std::filesystem::path x64HelperPath =
-        wil::GetModuleFileName<std::wstring>();
+        wil::GetModuleFileName<std::wstring>(g_hDllInst);
     x64HelperPath.replace_filename(L"shihab-alaq-x64-helper.exe");
 
     STARTUPINFO si = {sizeof(STARTUPINFO)};
