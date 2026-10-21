@@ -101,7 +101,7 @@
     <IncludePath>$(ProjectDir)libraries;$(ProjectDir)..\shared;$(ProjectDir)..\shared\libraries;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)libraries;$(ProjectDir)..\shared\libraries;$(LibraryPath)</LibraryPath>
     <GenerateManifest>false</GenerateManifest>
-    <TargetName>windhawk</TargetName>
+    <TargetName>shihab-alaq-engine</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -109,13 +109,13 @@
     <IncludePath>$(ProjectDir)libraries;$(ProjectDir)..\shared;$(ProjectDir)..\shared\libraries;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)libraries;$(ProjectDir)..\shared\libraries;$(LibraryPath)</LibraryPath>
     <GenerateManifest>false</GenerateManifest>
-    <TargetName>windhawk</TargetName>
+    <TargetName>shihab-alaq-engine</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <IncludePath>$(ProjectDir)libraries;$(ProjectDir)..\shared;$(ProjectDir)..\shared\libraries;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)libraries;$(ProjectDir)..\shared\libraries;$(LibraryPath)</LibraryPath>
     <GenerateManifest>false</GenerateManifest>
-    <TargetName>windhawk</TargetName>
+    <TargetName>shihab-alaq-engine</TargetName>
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\arm64\</OutDir>
   </PropertyGroup>
@@ -125,7 +125,7 @@
     <IncludePath>$(ProjectDir)libraries;$(ProjectDir)..\shared;$(ProjectDir)..\shared\libraries;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)libraries;$(ProjectDir)..\shared\libraries;$(LibraryPath)</LibraryPath>
     <GenerateManifest>false</GenerateManifest>
-    <TargetName>windhawk</TargetName>
+    <TargetName>shihab-alaq-engine</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -133,13 +133,13 @@
     <IncludePath>$(ProjectDir)libraries;$(ProjectDir)..\shared;$(ProjectDir)..\shared\libraries;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)libraries;$(ProjectDir)..\shared\libraries;$(LibraryPath)</LibraryPath>
     <GenerateManifest>false</GenerateManifest>
-    <TargetName>windhawk</TargetName>
+    <TargetName>shihab-alaq-engine</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <IncludePath>$(ProjectDir)libraries;$(ProjectDir)..\shared;$(ProjectDir)..\shared\libraries;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)libraries;$(ProjectDir)..\shared\libraries;$(LibraryPath)</LibraryPath>
     <GenerateManifest>false</GenerateManifest>
-    <TargetName>windhawk</TargetName>
+    <TargetName>shihab-alaq-engine</TargetName>
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\arm64\</OutDir>
   </PropertyGroup>

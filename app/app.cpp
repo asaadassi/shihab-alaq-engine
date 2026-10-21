@@ -70,7 +70,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                              UOI_TIMERPROC_EXCEPTION_SUPPRESSION, &insanity,
                              sizeof(insanity));
 
-    SetCurrentProcessExplicitAppUserModelID(L"RamenSoftware.Windhawk");
+    SetCurrentProcessExplicitAppUserModelID(L"ShihabApp.ShihabAlaq.Engine");
 
     Action action = Action::kDefault;
     if (DoesParamExist(L"-service")) {
@@ -113,7 +113,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
             case Action::kRunUIAsAdmin:
             case Action::kRunUIInSafeMode:
             case Action::kServiceStartAndRunUI:
-                ::MessageBoxA(nullptr, e.what(), "Windhawk error",
+                ::MessageBoxA(nullptr, e.what(), "Alaq error",
                               MB_ICONERROR);
                 break;
 
@@ -230,7 +230,7 @@ void Run(Action action) {
         }
 
         default:
-            VERBOSE("Running Windhawk daemon");
+            VERBOSE("Running the engine daemon");
             RunDaemon();
             break;
     }
@@ -281,7 +281,7 @@ void RunDaemon() {
     }
 
     wil::unique_mutex_nothrow mutex(
-        ::CreateMutex(nullptr, TRUE, L"WindhawkDaemon"));
+        ::CreateMutex(nullptr, TRUE, L"ShihabAlaqEngineDaemon"));
     THROW_LAST_ERROR_IF_NULL(mutex);
 
     if (GetLastError() == ERROR_ALREADY_EXISTS) {
@@ -338,17 +338,17 @@ void CheckForUpdates() {
 
 void NotifyNewUpdatesFound() {
     SetNamedEventForAllSessions(
-        L"Global\\WindhawkNewUpdatesFoundEvent-daemon-session=");
+        L"Global\\ShihabAlaqNewUpdatesFoundEvent-daemon-session=");
 }
 
 void NotifyAppSettingsChanged() {
     if (StorageManager::GetInstance().IsPortable()) {
-        SetNamedEvent(L"WindhawkAppSettingsChangedEvent-daemon");
+        SetNamedEvent(L"ShihabAlaqAppSettingsChangedEvent-daemon");
         return;
     }
 
     SetNamedEventForAllSessions(
-        L"Global\\WindhawkAppSettingsChangedEvent-daemon-session=");
+        L"Global\\ShihabAlaqAppSettingsChangedEvent-daemon-session=");
 }
 
 void ExitApp(bool wait, DWORD timeout) {
@@ -461,7 +461,7 @@ void WaitForRunningProcessesToTerminate(DWORD timeout, bool windhawkBgOnly) {
             }
 
             if (windhawkBgOnly) {
-                if (_wcsicmp(pe.szExeFile, L"windhawk.exe") != 0) {
+                if (_wcsicmp(pe.szExeFile, L"ShihabAlaqEngine.exe") != 0) {
                     continue;
                 }
             } else {
@@ -566,7 +566,7 @@ bool RunAsAdmin(PCWSTR parameters) {
 
 bool PostCommandToPortableRunningDaemon(
     CMainWindow::PortableAppCommand command) {
-    CWindow hDaemonWnd(FindWindow(L"WindhawkDaemon", nullptr));
+    CWindow hDaemonWnd(FindWindow(L"ShihabAlaqEngineDaemon", nullptr));
     if (!hDaemonWnd) {
         return false;
     }

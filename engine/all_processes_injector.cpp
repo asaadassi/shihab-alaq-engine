@@ -100,7 +100,7 @@ USHORT GetNativeMachine() {
 DWORD64 GetRtlUserThreadStart_x64OnArm64() {
     std::filesystem::path x64HelperPath =
         wil::GetModuleFileName<std::wstring>();
-    x64HelperPath.replace_filename(L"windhawk-x64-helper.exe");
+    x64HelperPath.replace_filename(L"shihab-alaq-x64-helper.exe");
 
     STARTUPINFO si = {sizeof(STARTUPINFO)};
     wil::unique_process_information process;

@@ -28,7 +28,7 @@ const json uiSettings = {
     {"editor.tabSize", 4},
     {"editor.insertSpaces", true},
     {"editor.detectIndentation", false},
-    {"clangd.path", "${env:WINDHAWK_COMPILER_PATH}\\bin\\clangd.exe"},
+    {"clangd.path", "${env:SHIHAB_ALAQ_COMPILER_PATH}\\bin\\clangd.exe"},
     {"clangd.arguments", {"-header-insertion=never"}},
     {"clangd.checkUpdates", false},
     {"window.menuBarVisibility", "compact"},
@@ -45,7 +45,7 @@ const json uiSettings = {
 
 const json uiSettingsToMigrate = {
     {"clangd.path",
-     "${env:WINDHAWK_UI_PATH}"
+     "${env:SHIHAB_ALAQ_UI_PATH}"
      "\\resources\\app\\extensions\\clangd\\clangd\\bin\\clangd.exe"},
 };
 
@@ -149,14 +149,14 @@ void RunUI() {
 
     // Will be used to locate the clangd executable.
     auto uiPath = StorageManager::GetInstance().GetUIPath();
-    SetEnvironmentVariable(L"WINDHAWK_UI_PATH", uiPath.c_str());
+    SetEnvironmentVariable(L"SHIHAB_ALAQ_UI_PATH", uiPath.c_str());
 
     auto compilerPath = StorageManager::GetInstance().GetCompilerPath();
-    SetEnvironmentVariable(L"WINDHAWK_COMPILER_PATH", compilerPath.c_str());
+    SetEnvironmentVariable(L"SHIHAB_ALAQ_COMPILER_PATH", compilerPath.c_str());
 
     static bool arm64Enabled = IsArm64NativeMachine();
     if (arm64Enabled) {
-        SetEnvironmentVariable(L"WINDHAWK_ARM64_ENABLED", L"1");
+        SetEnvironmentVariable(L"SHIHAB_ALAQ_ARM64_ENABLED", L"1");
     }
 
     auto uiExePath = uiPath / L"VSCodium.exe";
@@ -220,7 +220,7 @@ bool RunUIViaSchedTask() {
     wil::com_ptr<ITaskFolder> rootFolder;
     THROW_IF_FAILED(taskService->GetFolder(rootFolderPath.get(), &rootFolder));
 
-    auto taskName = wil::make_bstr(L"WindhawkRunUITask");
+    auto taskName = wil::make_bstr(L"ShihabAlaqRunUITask");
     wil::com_ptr<IRegisteredTask> task;
     THROW_IF_FAILED(rootFolder->GetTask(taskName.get(), &task));
 

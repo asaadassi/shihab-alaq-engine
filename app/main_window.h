@@ -14,7 +14,7 @@ class CMainWindow : public CWindowImpl<CMainWindow, CWindow, CNullTraits>,
                     public CMessageFilter,
                     public CIdleHandler {
    public:
-    DECLARE_WND_CLASS(L"WindhawkDaemon")
+    DECLARE_WND_CLASS(L"ShihabAlaqEngineDaemon")
 
     // Custom messages.
     enum {

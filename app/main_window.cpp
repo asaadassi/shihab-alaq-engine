@@ -226,7 +226,7 @@ int CMainWindow::OnCreate(LPCREATESTRUCT lpCreateStruct) {
             InitForNonPortableVersion();
         }
     } catch (const std::exception& e) {
-        ::MessageBoxA(nullptr, e.what(), "Could not initialize Windhawk",
+        ::MessageBoxA(nullptr, e.what(), "Could not initialize AlaqEngine",
                       MB_ICONERROR);
         return -1;
     }
@@ -540,7 +540,7 @@ void CMainWindow::InitForPortableVersion() {
     SetTimer(Timer::kHandleNewProcesses, kHandleNewProcessInterval);
 
     m_appSettingsChangedEvent.reset(Functions::CreateEventForMediumIntegrity(
-        L"WindhawkAppSettingsChangedEvent-daemon"));
+        L"ShihabAlaqAppSettingsChangedEvent-daemon"));
 
     FILETIME creationTime;
     FILETIME exitTime;
@@ -568,14 +568,14 @@ void CMainWindow::InitForNonPortableVersion() {
         ProcessIdToSessionId(GetCurrentProcessId(), &sessionId));
 
     std::wstring appSettingsChangedEventName =
-        L"Global\\WindhawkAppSettingsChangedEvent-daemon-session=" +
+        L"Global\\ShihabAlaqAppSettingsChangedEvent-daemon-session=" +
         std::to_wstring(sessionId);
 
     m_appSettingsChangedEvent.reset(Functions::CreateEventForMediumIntegrity(
         appSettingsChangedEventName.c_str()));
 
     std::wstring newUpdatesFoundEventName =
-        L"Global\\WindhawkNewUpdatesFoundEvent-daemon-session=" +
+        L"Global\\ShihabAlaqNewUpdatesFoundEvent-daemon-session=" +
         std::to_wstring(sessionId);
 
     m_newUpdatesFoundEvent.reset(Functions::CreateEventForMediumIntegrity(
@@ -856,7 +856,7 @@ void CMainWindow::StopService(HWND hWnd) {
                                 std::string msg =
                                     "Exiting failed with the error below. If "
                                     "nothing else works, you can choose to "
-                                    "send an exit signal to the Windhawk "
+                                    "send an exit signal to the AlaqEngine "
                                     "service. Send exit signal?\n\nError:\n";
 
                                 msg += e.what();
@@ -1008,12 +1008,12 @@ void CMainWindow::ResetLastUpdateTime() {
 
 void CMainWindow::OpenUpdatePage() {
     PCWSTR url =
-        L"https://windhawk.net/download?version=" VER_FILE_VERSION_WSTR;
+        L"https://github.com/asaadassi/shihab-alaq-releases/releases";
 
     if ((int)(UINT_PTR)ShellExecute(m_hWnd, nullptr, url, nullptr, nullptr,
                                     SW_SHOWNORMAL) <= 32) {
         MessageBox(
-            L"Could not open the update page, please update Windhawk manually",
+            L"Could not open the update page, please update Alaq manually",
             L"Error", MB_ICONERROR);
     }
 }

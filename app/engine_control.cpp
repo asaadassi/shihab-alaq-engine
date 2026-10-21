@@ -6,13 +6,13 @@
 
 EngineControl::EngineControl() {
     auto engineLibraryPath =
-        StorageManager::GetInstance().GetEnginePath() / L"windhawk.dll";
+        StorageManager::GetInstance().GetEnginePath() / L"shihab-alaq-engine.dll";
 
     engineModule.reset(LoadLibrary(engineLibraryPath.c_str()));
     THROW_LAST_ERROR_IF_NULL_MSG(
         engineModule,
         "Failed to load engine library: %ls, make sure that the engine path "
-        "that's specified in windhawk.ini is correct",
+        "that's specified in ShihabAlaqEngine.ini is correct",
         engineLibraryPath.c_str());
 
     pGlobalHookSessionStart = reinterpret_cast<GLOBAL_HOOK_SESSION_START>(

@@ -109,13 +109,13 @@ void CustomizationSession::Start(
     bool threadAttachExempt,
     wil::unique_process_handle sessionManagerProcess,
     wil::unique_mutex_nothrow sessionMutex) {
-    std::wstring semaphoreName = L"WindhawkCustomizationSessionSemaphore-pid=" +
+    std::wstring semaphoreName = L"ShihabAlaqCustomizationSessionSemaphore-pid=" +
                                  std::to_wstring(GetCurrentProcessId());
     wil::unique_semaphore semaphore(1, 1, semaphoreName.c_str());
 
     // We don't want to wait in APC context infinitely, since it will prevent
     // the process from launching. If we can't acquire the semaphore while
-    // running from APC, it means that two Windhawk engines are being loaded
+    // running from APC, it means that two engines are being loaded
     // simultaneously, which is generally not supported.
     DWORD timeout = runningFromAPC ? 0 : INFINITE;
     wil::semaphore_release_scope_exit semaphoreLock =
@@ -466,7 +466,7 @@ void CustomizationSession::StartInitialized(
     }
 
     Functions::SetThreadDescriptionIfAvailable(
-        thread.get(), L"WindhawkMainLoopThreadAttachExempt");
+        thread.get(), L"ShihabAlaqMainLoopThreadAttachExempt");
 }
 
 void CustomizationSession::
@@ -535,7 +535,7 @@ void CustomizationSession::
     }
 
     Functions::SetThreadDescriptionIfAvailable(thread.get(),
-                                               L"WindhawkMainLoop");
+                                               L"ShihabAlaqMainLoop");
 }
 
 void CustomizationSession::RunMainLoop() noexcept {
